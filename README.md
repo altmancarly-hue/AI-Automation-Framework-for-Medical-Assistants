@@ -3654,13 +3654,8 @@ model at all, or use one only to write down what a human already decided. The
 value is in the plumbing — connecting systems that do not talk, and replacing
 paper with structured data that can be queried, audited, and improved.
 
-A practice that has been independent for fifty years did not get there by
-adopting every new thing. It got there by adopting the right things carefully.
-This plan is written to be adopted that way: measured first, piloted second,
-scaled third, and audited continuously.
-
 ---
 
-*Prepared by Patrick Campbell · August 2026*
+*Prepared by Carly Altmanl · August 2026*
 *Pricing verified August 2026 from public vendor materials; confirm directly before contracting.*
 *This document contains no protected health information.*
