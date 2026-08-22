@@ -1,4 +1,4 @@
-# AI & Automation Program — North Suburban Pediatrics (Buffalo Grove)
+# AI & Automation Program Guide
 
 **A workflow-by-workflow implementation plan for automating the Medical Assistant / LPN role in a small independent pediatric practice.**
 
@@ -6,7 +6,7 @@ Author: Carly Altman
 Version: 1.0
 Date: 2026-08-21
 Audience: Practice Owner / Office Manager / Physician Partners
-Classification: Internal — Contains no PHI
+Classification: Public — Contains no PHI
 
 ---
 
@@ -83,11 +83,6 @@ credibility when the first invoice arrives.
 ## 1. Executive Summary
 
 ### The Situation
-
-North Suburban Pediatrics is a fifty-year-old independent pediatric group with
-two sites and roughly ten physicians. It runs a high-throughput, walk-in-heavy
-schedule — morning walk-in sick hours, evening sick clinics four nights a week,
-and weekend and holiday morning sessions. It is open seven days a week.
 
 The practice's operating stack is, by observable evidence, substantially manual:
 
