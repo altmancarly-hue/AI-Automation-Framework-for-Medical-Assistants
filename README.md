@@ -1,4 +1,4 @@
-# AI & Automation for the Medical Assistant Role
+# AI-Automation-Framework-for-Medical-Assistants
 
 ### A workflow-by-workflow implementation guide for small independent pediatric practices
 
@@ -6,7 +6,6 @@ Author: Carly Altman
 Version: 2.0
 Date: 2026-08-22
 Audience: Practice Owner / Office Manager / Physician Partners / Medical Assistants
-Reference practice: North Suburban Pediatrics, Buffalo Grove, Illinois
 Classification: Contains no PHI
 
 ---
