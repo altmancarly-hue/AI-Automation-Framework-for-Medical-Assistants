@@ -1,0 +1,85 @@
+# Cold chain thresholds and escalation, per CDC Vaccine Storage and Handling.
+#
+# DATA, not code, because these numbers are a clinical decision and a compliance
+# artefact. A practice tunes the warning bands during a baseline period (README
+# I-08 risk table: "Tune warning bands during a 30-day baseline period before
+# enabling escalation") and that is a YAML diff a person can sign off, not a
+# deploy.
+#
+# The `review` block is the same gate the reference-range table in I-06 carries:
+# the shipped numbers are the CDC published ranges, but who owns them at THIS
+# practice is a name somebody has to put here before anything runs.
+
+version: "2026.08"
+
+review:
+  owner: "UNASSIGNED - assign a clinical owner before production use"
+  reviewed_on: ""
+  note: >
+    Ranges are the CDC Vaccine Storage and Handling Toolkit published values.
+    Confirm them against the current toolkit and against each manufacturer's
+    package insert for what this practice actually stocks.
+
+# Escalation timings. Minutes.
+escalation:
+  # README I-08: "Sustained excursion (out of range > 15 min) -> escalate to
+  # physician partner and practice owner, 24/7, including nights and weekends".
+  sustained_excursion_minutes: 15
+  # "Door open > 3 min -> immediate SMS"
+  door_open_minutes: 3
+  # "Sensor offline > 30 min -> alert (a dead sensor is an unmonitored fridge)"
+  sensor_offline_minutes: 30
+  # A logger that reports every 5 minutes is 6 readings behind at 30 minutes.
+  expected_reading_interval_minutes: 5
+  # Below this the logger itself is about to become the failure.
+  low_battery_percent: 20
+  # How often a condition that is STILL TRUE is repeated. Without this, a
+  # five-minute poll announces every standing condition 288 times a day: a
+  # calibration date thirty days out would page the office manager 8,640 times
+  # before it came due, which is the alert-fatigue failure this file's own
+  # comments warn about. Minutes; keyed by severity, or by alert kind.
+  renotify_minutes:
+    critical: 60
+    warning: 240
+    info: 1440
+    calibration_due: 1440
+    low_battery: 1440
+
+unit_types:
+  refrigerator:
+    label: "Vaccine refrigerator"
+    # CDC: 2C to 8C, target 5C.
+    min_c: 2.0
+    max_c: 8.0
+    target_c: 5.0
+    # The band inside the limits that raises a WARNING rather than an excursion.
+    # Deliberately narrow: a warning that fires at 3.9C on a unit that normally
+    # runs at 4C is an alert nobody reads.
+    warning_margin_c: 0.5
+
+  freezer:
+    label: "Vaccine freezer"
+    # CDC: -50C to -15C.
+    min_c: -50.0
+    max_c: -15.0
+    target_c: -20.0
+    warning_margin_c: 1.0
+
+  ultra_cold:
+    label: "Ultra-cold freezer"
+    min_c: -80.0
+    max_c: -60.0
+    target_c: -70.0
+    warning_margin_c: 2.0
+
+# Who hears about what. Roles, not people: the on-call rotation is an operational
+# table, and README I-08's own risk row is "Alerts sent to a phone nobody carries
+# on weekends -> HIGH -> explicit on-call rotation, tested monthly".
+routing:
+  warning:            ["on_site_staff"]
+  excursion:          ["on_site_staff", "office_manager"]
+  sustained_excursion: ["on_site_staff", "office_manager", "physician_partner", "practice_owner"]
+  door_open:          ["on_site_staff"]
+  sensor_offline:     ["on_site_staff", "office_manager"]
+  low_battery:        ["office_manager"]
+  calibration_due:    ["office_manager"]

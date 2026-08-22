@@ -1,0 +1,6 @@
+MRN,Patient,Date of Service,Provider,Visit Type
+10231,"Torres, Mila",2026-08-10,Dr. Alvarez,Well child
+10877,"Nowak, Filip",2026-08-11,Dr. Alvarez,Sick
+11004,"Adeyemi, Chidi",2026-08-12,Dr. Osei,Well child
+11220,"Reyes, Sofia",2026-08-12,Dr. Osei,Sick
+11901,"Petrov, Juno",2026-08-13,Dr. Alvarez,Sports physical

@@ -1,0 +1,83 @@
+# ---------------------------------------------------------------------------
+# Telephone triage protocol registry and disposition ladder (I-04).
+#
+# LICENSING NOTE, READ THIS FIRST
+#
+# The Schmitt-Thompson pediatric telephone protocols are copyrighted and
+# licensed.  Their CONTENT -- the questions, the decision rules, the care advice
+# -- is NOT reproduced here and must not be.  This file is a registry of
+# IDENTIFIERS so the system can record which protocol the medical assistant
+# selected, and nothing more.  The MA reads the protocol from the practice's
+# licensed copy; this system stores the fact that they used it.
+#
+# The placeholder entries below exist so the code runs and the tests have
+# something to select.  Before go-live, replace `protocols` with the identifier
+# list exported from the practice's licensed library, keeping the same shape.
+# `source` should name that library and its version so a note written in 2027
+# can be traced to the protocol edition that was in force.
+#
+# WHY IDENTIFIERS AND NOT FREE TEXT: "used the fever protocol" is not evidence.
+# A stable identifier plus a library version is what demonstrates that a
+# standard of care was followed, which is the whole point of recording it.
+# ---------------------------------------------------------------------------
+
+source: "PLACEHOLDER - replace with the practice's licensed protocol library"
+library_version: "placeholder-0"
+
+protocols:
+  - id: "PLACEHOLDER-FEVER"
+    title: "Fever (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-COUGH"
+    title: "Cough (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-VOMITING"
+    title: "Vomiting (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-RASH"
+    title: "Rash, widespread (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-EAR-PAIN"
+    title: "Ear pain (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-HEAD-INJURY"
+    title: "Head injury (placeholder)"
+    age_min_months: 0
+    age_max_months: 216
+  - id: "PLACEHOLDER-NEWBORN-FEVER"
+    title: "Fever, newborn under 12 weeks (placeholder)"
+    age_min_months: 0
+    age_max_months: 3
+
+# The care levels an MA can tap.  These are generic dispositions, not protocol
+# content, so they are safe to enumerate here.  ORDER MATTERS: `rank` ascends
+# with acuity and is used only for reporting, never to suggest anything.
+dispositions:
+  - id: "home_care"
+    label: "Home care with safety-net advice"
+    rank: 1
+  - id: "see_tomorrow"
+    label: "Appointment tomorrow"
+    rank: 2
+  - id: "see_today"
+    label: "Appointment today"
+    rank: 3
+  - id: "see_now"
+    label: "Come in now"
+    rank: 4
+  - id: "escalate_physician"
+    label: "Escalated to physician"
+    rank: 5
+    # 225 ILCS 60/54.2: an unlicensed MA acts under delegation.  An escalation
+    # is the moment a licensed professional takes the decision, so the record
+    # has to name them.
+    requires_supervising_professional: true
+  - id: "ed_now"
+    label: "Emergency department now"
+    rank: 6
+    requires_supervising_professional: true

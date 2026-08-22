@@ -1,0 +1,23 @@
+# Test-name aliases for `officeops qc-log`.
+#
+# Same discipline as the column mappings, for the same reason: a log recording
+# "Influenza A/B" and a command reading `--tests flu` describe the same assay,
+# and a tool that reports 0% completeness on a perfect log because of it is the
+# most damaging kind of false alarm -- it looks exactly like a catastrophic
+# compliance finding on the first run.
+#
+# The key is the canonical name you pass to --tests. The list is what your log
+# may call it. Matching normalises case, spaces and punctuation, and either side
+# may contain the other, so "Strep A" already matches "strep" without an entry.
+
+columns:
+  strep: [strep, strep a, rapid strep, group a strep, strep screen, gas]
+  flu: [flu, influenza, influenza a/b, flu a/b, rapid influenza, influenza ab]
+  urine: [urine, urinalysis, ua, urine dip, urine dipstick, urine chemistry]
+  covid: [covid, covid-19, sars-cov-2, sars cov 2, rapid antigen, covid ag]
+  hemoglobin: [hemoglobin, hgb, hb, hemocue, hematocrit, hct]
+  glucose: [glucose, blood glucose, glucometer, accucheck, accu-chek]
+  mono: [mono, monospot, heterophile, ebv rapid]
+  rsv: [rsv, respiratory syncytial virus, rsv antigen]
+  lead: [lead, blood lead, leadcare, capillary lead]
+  pregnancy: [pregnancy, hcg, urine hcg, upt]

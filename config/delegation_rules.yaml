@@ -1,0 +1,129 @@
+# Delegation rules for 225 ILCS 60/54.2.
+#
+# THIS FILE IS THE POINT OF I-10.
+#
+# README I-10: "The design decision that makes this future-proof: delegation
+# rules live in CONFIGURATION, NOT CODE. When Section 54.2 sunsets on January 1,
+# 2027 -- or when replacement legislation establishes a different framework,
+# possibly including formal certification requirements -- the practice changes a
+# rules configuration and a competency schema, not an application. That is the
+# entire architectural argument for building this before the statutory deadline
+# rather than after."
+#
+# So the statute's requirements are expressed here as data. `enforcement.py`
+# reads them and knows nothing about Illinois.
+
+version: "2026.08"
+
+framework:
+  id: "il_225_ilcs_60_54_2"
+  citation: "225 ILCS 60/54.2"
+  description: >
+    A physician in an office setting may delegate patient care tasks to an
+    unlicensed person who possesses appropriate training and experience,
+    provided a licensed health care professional is on site. The delegated task
+    must fall within the scope, education, training, or experience of the
+    delegating physician.
+  # The date this framework stops being the law. `enforcement.py` warns as it
+  # approaches and refuses to claim compliance after it, because a system that
+  # silently keeps citing a sunset statute is worse than one that says nothing.
+  sunsets_on: "2027-01-01"
+  # Days before the sunset at which the register starts saying so.
+  sunset_warning_days: 180
+
+review:
+  owner: "UNASSIGNED - the delegating physician owns this file"
+  reviewed_on: ""
+
+# What the framework requires of every delegated act. Each is checked by
+# `enforcement.py` and each failure is a named reason, so an audit answer is a
+# list of rule ids rather than a paragraph.
+requirements:
+  - id: written_delegation
+    description: >
+      The act must be authorised by a standing order that was in force, signed,
+      and not retired on the date of the act.
+    blocking: true
+
+  - id: individual_competency
+    description: >
+      The statute requires "appropriate training and experience" FOR THAT
+      PERSON. A competency held by the practice is not a competency held by the
+      staff member.
+    blocking: true
+
+  - id: competency_current
+    description: >
+      The competency must not have expired on the date of the act. An expired
+      competency is not a lesser competency; it is an unverified one.
+    blocking: true
+
+  - id: licensed_professional_on_site
+    description: >
+      A licensed health care professional must be physically on site. This is
+      the requirement most often satisfied in fact and unevidenced in the
+      record.
+    blocking: true
+
+  - id: within_delegating_scope
+    description: >
+      The task must fall within the scope, education, training or experience of
+      the DELEGATING physician, not merely of the person performing it.
+    blocking: true
+
+# Who counts as a licensed professional for the on-site requirement. A role not
+# on this list does not satisfy it, however senior.
+licensed_roles:
+  - physician
+  - advanced_practice_registered_nurse
+  - physician_assistant
+  - registered_nurse
+
+# Roles that may perform delegated tasks at all.
+delegable_to_roles:
+  - medical_assistant
+  - licensed_practical_nurse
+  - registered_nurse
+
+# Competency expiry policy.
+competency:
+  # A task is refused this many days AFTER expiry... which is zero. An expired
+  # competency is unverified from the moment it expires.
+  grace_days: 0
+  # ...and a renewal task is raised this many days BEFORE.
+  renewal_warning_days: 30
+  # Evidence kinds a verifier may record. An allowlist: "verbal confirmation"
+  # and "has done it for years" are exactly what this initiative exists to
+  # replace, and they are not on it.
+  evidence_kinds:
+    - training_certificate
+    - observed_demonstration
+    - written_examination
+    - return_demonstration
+    - external_credential
+
+# Standing order review cadence.
+standing_orders:
+  # A protocol nobody has looked at in this long is a protocol that has drifted.
+  review_interval_days: 365
+  review_warning_days: 60
+
+# BREAK GLASS. README I-10 and the build plan both require it, and the build
+# plan is specific: "Include a break-glass path that requires a justification and
+# never blocks patient care."
+#
+# The design is deliberately asymmetric. It cannot be refused, and it cannot be
+# quiet: every use is recorded with `break_glass=True`, appears in
+# `unevidenced_supervision()` forever, and generates a review task. A break-glass
+# nobody reviews afterwards is just an unlocked door.
+break_glass:
+  enabled: true
+  min_justification_chars: 40
+  review_within_hours: 24
+  # Roles that may invoke it. Everyone who can perform a delegated task can,
+  # because the alternative is a child not treated while somebody finds a
+  # manager.
+  roles:
+    - medical_assistant
+    - licensed_practical_nurse
+    - registered_nurse

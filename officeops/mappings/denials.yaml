@@ -1,0 +1,28 @@
+# Column aliases, shared across every task.
+#
+# THIS IS THE FILE YOU EDIT WHEN THE EXPORT DOES NOT MATCH. Every EHR spells the
+# same fact differently, and the fix for "no column for patient_id" is an alias
+# here -- never a renamed column in the export, because the export is
+# regenerated every day by somebody who will not remember to rename it.
+#
+# Matching is case-insensitive and ignores surrounding whitespace.
+columns:
+  patient_id: [patient id, patient_id, mrn, medical record number, chart number,
+               chart no, patient number, pat id, record id]
+  patient_name: [patient name, patient, name, patient_name, pt name, full name,
+                 patient full name]
+  dob: [dob, date of birth, birth date, birthdate, birth_date, patient dob]
+  phone: [phone, phone number, home phone, mobile, cell, contact number,
+          primary phone, telephone]
+  provider: [provider, physician, doctor, rendering provider, seen by, clinician,
+             attending, pcp]
+  language: [language, preferred language, primary language, spoken language]
+  notes: [notes, note, comment, comments, remarks]
+  denial_date: [denial date, date, remit date, era date, adjudication date,
+                processed, posted]
+  reason_code: [reason code, denial code, carc, adjustment reason code, code,
+                reason]
+  reason_description: [reason description, denial reason, description, remark,
+                       explanation, message]
+  payer: [payer, insurance, carrier, plan, payor, insurance company]
+  amount: [amount, denied amount, charge, billed, balance, adjustment amount]

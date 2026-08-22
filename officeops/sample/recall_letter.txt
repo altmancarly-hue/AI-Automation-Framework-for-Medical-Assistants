@@ -1,0 +1,10 @@
+{{patient_name}}
+{{address}}
+{{city}}, {{state}} {{zip}}
+
+Dear parent or guardian of {{patient_name}},
+
+Our records show the last well-child visit was on {{last_well_visit}}.
+Please call the office to schedule the next one.
+
+North Suburban Pediatrics

@@ -1,0 +1,426 @@
+# Bright Futures / AAP periodicity schedule, plus the Illinois-specific
+# requirements a pediatric practice in this state has to meet.
+#
+# THIS FILE IS THE AUTHORITY. There is no screening knowledge in
+# modules/previsit/periodicity.py -- same discipline as
+# config/immunization_schedule.yaml. README I-03's risk table names the failure
+# this prevents: "Screening rules table drifts from current guidelines |
+# Medium | Version the config; annual review tied to the Bright Futures/ACIP
+# update cycle; owner assigned."
+#
+# A screening entry means: at these ages, this screening is expected, it is
+# billable under these codes, and here is the authority that says so. It does
+# NOT mean the system decides whether the child needs it -- a screening the
+# clinician declines is recorded as declined, not silently dropped.
+#
+# FIELDS
+#   id                    stable key; never reuse one for a different screening
+#   name                  what appears on the brief
+#   category              grouping on the brief
+#   cpt                   billing codes, for the capture-rate KPI (README 10.2)
+#   due_at_months         discrete ages at which it is expected
+#   from_months/to_months an age band, used with every_months
+#   every_months          cadence inside the band
+#   once_in_band          true when one completion anywhere in the band is enough
+#   window_months         grace either side of a due age before it reads overdue
+#   catch_up_until_months past this age a missed screening is no longer offered
+#   requires_risk_flag    only due when this risk flag is set on the patient
+#   risk_assessment_for   this entry IS the risk assessment that sets that flag
+#   authority             the citation, so a reviewer can check it
+
+version: "2026.08"
+source: "AAP Bright Futures Recommendations for Preventive Pediatric Health Care (periodicity schedule), plus Illinois statute where noted"
+review:
+  owner: "UNASSIGNED - assign before production use"
+  last_reviewed: "2026-08-22"
+  next_review_due: "2027-08-22"
+  reviewed_by: ""
+
+# Well-visit ages, for deciding whether today's visit is a periodicity visit.
+well_visit_months: [0.1, 1, 2, 4, 6, 9, 12, 15, 18, 24, 30, 36, 48, 60, 72, 84,
+                    96, 108, 120, 132, 144, 156, 168, 180, 192, 204, 216, 228, 240, 252]
+
+screenings:
+
+  # -- newborn --------------------------------------------------------------
+  - id: newborn_metabolic
+    name: "Newborn metabolic and hemoglobinopathy screen"
+    category: newborn
+    cpt: []
+    due_at_months: [0.1]
+    window_months: 1
+    catch_up_until_months: 6
+    authority: "Illinois Newborn Screening (410 ILCS 240); AAP Bright Futures"
+
+  - id: newborn_hearing
+    name: "Newborn hearing screen"
+    category: hearing
+    cpt: []
+    due_at_months: [0.1]
+    window_months: 1
+    catch_up_until_months: 12
+    authority: "Illinois Hearing Screening for Newborns Act (410 ILCS 213)"
+
+  - id: newborn_cchd
+    name: "Critical congenital heart disease pulse oximetry"
+    category: newborn
+    cpt: []
+    due_at_months: [0.1]
+    window_months: 1
+    catch_up_until_months: 3
+    authority: "Illinois CCHD screening rule; AAP"
+
+  - id: newborn_bilirubin
+    name: "Bilirubin"
+    category: newborn
+    cpt: []
+    due_at_months: [0.1]
+    window_months: 1
+    catch_up_until_months: 2
+    authority: "AAP Bright Futures"
+
+  # -- development and behaviour --------------------------------------------
+  - id: developmental_screen
+    name: "Developmental screening (ASQ-3 or equivalent)"
+    category: developmental
+    cpt: ["96110"]
+    due_at_months: [9, 18, 30]
+    window_months: 3
+    catch_up_until_months: 60
+    authority: "AAP Bright Futures; AAP developmental surveillance policy"
+
+  - id: autism_screen
+    name: "Autism screening (M-CHAT-R/F)"
+    category: developmental
+    cpt: ["96110"]
+    due_at_months: [18, 24]
+    window_months: 3
+    catch_up_until_months: 36
+    authority: "AAP Bright Futures; AAP autism identification policy"
+
+  - id: maternal_depression
+    name: "Maternal depression screening (EPDS)"
+    category: psychosocial
+    cpt: ["96161"]
+    due_at_months: [1, 2, 4, 6]
+    window_months: 1
+    catch_up_until_months: 12
+    authority: "AAP Bright Futures; AAP policy on perinatal depression"
+
+  - id: adolescent_depression
+    name: "Adolescent depression screening (PHQ-A)"
+    category: psychosocial
+    cpt: ["96127"]
+    from_months: 144
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    authority: "AAP Bright Futures; USPSTF depression screening 12-18"
+
+  - id: suicide_risk
+    name: "Suicide risk screening (ASQ tool)"
+    category: psychosocial
+    cpt: ["96127"]
+    from_months: 144
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    authority: "AAP Bright Futures (added 2023 periodicity revision)"
+
+  - id: substance_use
+    name: "Tobacco, alcohol and drug use screening (CRAFFT)"
+    category: psychosocial
+    cpt: ["99408"]
+    from_months: 132
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    authority: "AAP Bright Futures; SBIRT"
+
+  # -- sensory --------------------------------------------------------------
+  - id: vision_instrument
+    name: "Instrument-based vision screening"
+    category: vision
+    cpt: ["99177"]
+    due_at_months: [12, 24, 36]
+    window_months: 6
+    catch_up_until_months: 48
+    authority: "AAP Bright Futures; AAP vision screening policy"
+
+  - id: vision_acuity
+    name: "Visual acuity screening"
+    category: vision
+    cpt: ["99173"]
+    due_at_months: [48, 60, 72, 96, 120, 144, 180]
+    window_months: 6
+    catch_up_until_months: 216
+    authority: "AAP Bright Futures"
+
+  - id: hearing_audiometry
+    name: "Audiometry hearing screening"
+    category: hearing
+    cpt: ["92551"]
+    due_at_months: [48, 60, 72, 96, 120]
+    window_months: 6
+    # A hearing screen missed at ten is still worth doing at eleven and is not
+    # worth carrying on a seventeen-year-old's brief for six more years.
+    catch_up_until_months: 132
+    authority: "AAP Bright Futures"
+
+  # Three entries, because the citation is three separate "once" requirements
+  # and a single 36-month cadence matched neither reading of it.
+  - id: hearing_adolescent_early
+    name: "Adolescent hearing screening (once, 11-14 years)"
+    category: hearing
+    cpt: ["92551"]
+    from_months: 132
+    to_months: 179
+    every_months: 48
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures (once each in 11-14, 15-17, 18-21)"
+
+  - id: hearing_adolescent_middle
+    name: "Adolescent hearing screening (once, 15-17 years)"
+    category: hearing
+    cpt: ["92551"]
+    from_months: 180
+    to_months: 215
+    every_months: 36
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures (once each in 11-14, 15-17, 18-21)"
+
+  - id: hearing_adolescent_late
+    name: "Adolescent hearing screening (once, 18-21 years)"
+    category: hearing
+    cpt: ["92551"]
+    from_months: 216
+    to_months: 252
+    every_months: 36
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures (once each in 11-14, 15-17, 18-21)"
+
+  # -- laboratory -----------------------------------------------------------
+  - id: lead_risk_assessment
+    name: "Lead risk assessment"
+    category: laboratory
+    cpt: []
+    from_months: 6
+    to_months: 72
+    every_months: 6
+    window_months: 3
+    risk_assessment_for: lead
+    authority: "Illinois Lead Poisoning Prevention Act (410 ILCS 45); IDPH 77 Ill. Adm. Code 845"
+
+  - id: lead_blood_universal
+    name: "Blood lead level"
+    category: laboratory
+    cpt: ["83655"]
+    due_at_months: [12, 24]
+    window_months: 3
+    catch_up_until_months: 72
+    authority: "410 ILCS 45; IDPH requires testing at 12 and 24 months for children in high-risk areas and on positive risk assessment"
+
+  - id: lead_blood_risk
+    name: "Blood lead level (risk-based, outside the 12/24-month tests)"
+    category: laboratory
+    cpt: ["83655"]
+    from_months: 6
+    to_months: 72
+    every_months: 12
+    window_months: 3
+    requires_risk_flag: lead
+    authority: "410 ILCS 45; IDPH"
+
+  - id: anemia_screen
+    name: "Hemoglobin or hematocrit"
+    category: laboratory
+    cpt: ["85018"]
+    due_at_months: [12]
+    window_months: 3
+    catch_up_until_months: 24
+    authority: "AAP Bright Futures; universal anemia screening at 12 months"
+
+  - id: anemia_risk_assessment
+    name: "Anemia risk assessment"
+    category: laboratory
+    cpt: []
+    from_months: 132
+    to_months: 252
+    every_months: 12
+    window_months: 6
+    risk_assessment_for: anemia
+    authority: "AAP Bright Futures"
+
+  - id: anemia_adolescent
+    name: "Hemoglobin (adolescent, risk-based)"
+    category: laboratory
+    cpt: ["85018"]
+    from_months: 132
+    to_months: 252
+    every_months: 12
+    window_months: 6
+    requires_risk_flag: anemia
+    authority: "AAP Bright Futures"
+
+  - id: dyslipidemia_universal
+    name: "Lipid panel (universal screen)"
+    category: laboratory
+    cpt: ["80061"]
+    from_months: 108
+    to_months: 132
+    every_months: 24
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures; NHLBI integrated guidelines (once between 9 and 11)"
+
+  - id: dyslipidemia_late_adolescent
+    name: "Lipid panel (late adolescent universal screen)"
+    category: laboratory
+    cpt: ["80061"]
+    from_months: 204
+    to_months: 252
+    every_months: 48
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures; NHLBI (once between 17 and 21)"
+
+  # Two entries because the schedule has two phases, and collapsing them into
+  # one band would either miss the infant assessments or invent an annual
+  # cadence in the first year. Both set the same risk flag.
+  - id: tb_risk_assessment_annual
+    name: "Tuberculosis risk assessment (annual)"
+    category: laboratory
+    cpt: []
+    # Starts at 30, not 36: the infant entry's last target is 24 months with a
+    # three-month window, so a 36-month start left ages 27-33 with no TB risk
+    # assessment at all.
+    from_months: 30
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    risk_assessment_for: tuberculosis
+    authority: "AAP Bright Futures; AAP Red Book (annual risk assessment after the third birthday)"
+
+  - id: tb_risk_assessment
+    name: "Tuberculosis risk assessment"
+    category: laboratory
+    cpt: []
+    due_at_months: [1, 6, 12, 24]
+    window_months: 3
+    catch_up_until_months: 36
+    risk_assessment_for: tuberculosis
+    authority: "AAP Bright Futures; AAP Red Book"
+
+  - id: tb_test
+    name: "Tuberculin skin test or IGRA"
+    category: laboratory
+    cpt: ["86580"]
+    from_months: 12
+    to_months: 252
+    every_months: 12
+    requires_risk_flag: tuberculosis
+    window_months: 3
+    authority: "AAP Red Book"
+
+  - id: hiv_screen
+    name: "HIV screening (once, 15-18 years)"
+    category: laboratory
+    cpt: ["87389"]
+    from_months: 180
+    to_months: 216
+    every_months: 36
+    once_in_band: true
+    window_months: 6
+    authority: "AAP Bright Futures; USPSTF; CDC (once between 15 and 18)"
+
+  - id: sexual_health_risk_assessment
+    name: "Sexual health risk assessment"
+    category: psychosocial
+    cpt: []
+    from_months: 132
+    to_months: 252
+    every_months: 12
+    window_months: 6
+    risk_assessment_for: sexually_active
+    authority: "AAP Bright Futures; CDC STI treatment guidelines"
+
+  - id: sti_screen
+    name: "Chlamydia and gonorrhea screening"
+    category: laboratory
+    cpt: ["87491", "87591"]
+    from_months: 132
+    to_months: 252
+    every_months: 12
+    requires_risk_flag: sexually_active
+    window_months: 6
+    authority: "AAP Bright Futures; CDC STI treatment guidelines"
+
+  # -- measurement and exam -------------------------------------------------
+  - id: blood_pressure
+    name: "Blood pressure"
+    category: measurement
+    cpt: []
+    from_months: 36
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    authority: "AAP Bright Futures; AAP 2017 pediatric hypertension guideline"
+
+  - id: bmi_percentile
+    name: "BMI percentile"
+    category: measurement
+    cpt: []
+    from_months: 24
+    to_months: 252
+    every_months: 12
+    window_months: 3
+    authority: "AAP Bright Futures"
+
+  - id: oral_health_varnish
+    name: "Fluoride varnish application"
+    category: oral
+    cpt: ["99188"]
+    from_months: 6
+    to_months: 72
+    every_months: 6
+    window_months: 3
+    authority: "AAP Bright Futures; USPSTF"
+
+  - id: oral_health_risk
+    name: "Oral health risk assessment"
+    category: oral
+    cpt: []
+    due_at_months: [6, 9, 12, 18, 24, 30]
+    window_months: 3
+    catch_up_until_months: 42
+    authority: "AAP Bright Futures"
+
+# Illinois school and sport requirements. These are not clinical screenings --
+# they are forms with deadlines, and they belong on the same brief because they
+# are the other thing that makes a family come back a second time.
+form_requirements:
+  - id: il_school_physical
+    name: "Illinois Certificate of Child Health Examination"
+    due_at_months: [60, 132, 168]
+    note: "Required entering kindergarten, 6th grade and 9th grade"
+    authority: "105 ILCS 5/27-8.1"
+  - id: il_dental_exam
+    name: "Illinois Proof of School Dental Examination"
+    due_at_months: [60, 84, 132, 168]
+    note: "Required in kindergarten, 2nd, 6th and 9th grade"
+    authority: "105 ILCS 5/27-8.1(6)"
+  - id: il_vision_exam
+    name: "Illinois Eye Examination Report"
+    due_at_months: [60]
+    note: "Required for kindergarten and any first-time Illinois enrollee"
+    authority: "105 ILCS 5/27-8.1(9)"
+  - id: sports_physical
+    name: "IHSA pre-participation physical"
+    from_months: 132
+    to_months: 228
+    every_months: 12
+    note: "Valid 395 days from the exam date"
+    authority: "IHSA by-laws"

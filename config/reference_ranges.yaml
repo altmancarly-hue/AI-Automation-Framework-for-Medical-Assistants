@@ -1,0 +1,220 @@
+# Pediatric laboratory reference ranges, for the DETERMINISTIC urgency override.
+#
+# README I-06's top risk is "Urgent document classified routine | CRITICAL", and
+# its control is: "every document containing a numeric lab value outside
+# reference range is force-flagged by rule regardless of LLM output". This file
+# is that rule. The build plan states the principle plainly: rules beat models
+# on safety paths.
+#
+# THIS FILE IS DATA AND IT IS NOT CLINICAL AUTHORITY. It exists to decide ONE
+# question -- does this document deserve a human's eyes today -- and it is
+# deliberately biased toward saying yes. It is not a diagnostic reference, it
+# does not replace the reporting laboratory's own ranges, and a value inside
+# these bounds is NOT thereby normal: the performing lab's range governs, and
+# the model's own judgement still runs alongside this.
+#
+# WHY AGE BANDS: pediatric ranges move with age by more than the width of the
+# range itself. Hemoglobin of 11.0 g/dL is normal at nine months and low at
+# fifteen years. A single adult range applied to a paediatric panel would
+# force-flag most healthy infants -- and an alert that fires on everything is an
+# alert nobody reads, which is the same failure as not alerting at all.
+#
+# WHAT IS DELIBERATELY NOT IN `critical_phrases`: "STAT". It is an ORDER
+# PRIORITY, printed on a large share of hospital paper before anyone has looked
+# at a result, and treating it as a critical-value notification put a portable
+# chest radiograph on the on-duty physician's one-hour pager. A phrase belongs
+# here only if a laboratory or a hospital printed it BECAUSE it had already
+# decided the result could not wait.
+#
+# Sources: the ranges below are ordinary paediatric teaching values and MUST be
+# replaced with the ranges printed by the laboratories this practice actually
+# receives results from. `UnreviewedRanges` is raised until an owner signs off.
+
+version: "2026.08"
+review:
+  owner: "UNASSIGNED - assign before production use"
+  last_reviewed: "2026-08-22"
+  next_review_due: "2027-08-22"
+  note: >
+    Replace every range with the reporting laboratory's own. Different analysers
+    print different ranges for the same analyte, and the range on the fax is the
+    one that matters.
+
+#: Values beyond these are almost certainly OCR damage rather than a real
+#: result -- a decimal point lost in a bad scan. They are STILL flagged, because
+#: refusing to flag a number you cannot read is the wrong direction, but they
+#: are labelled so a human is not sent chasing a phantom critical value.
+implausible_multiplier: 10.0
+
+analytes:
+  - id: hemoglobin
+    name: "Hemoglobin"
+    units: ["g/dl", "g/dL", "gm/dl"]
+    aliases: [hemoglobin, haemoglobin, hgb, hb]
+    bands:
+      - {age_months_min: 0,   age_months_max: 1,   low: 13.5, high: 21.5}
+      - {age_months_min: 1,   age_months_max: 6,   low: 9.5,  high: 14.0}
+      - {age_months_min: 6,   age_months_max: 24,  low: 10.5, high: 13.5}
+      - {age_months_min: 24,  age_months_max: 72,  low: 11.0, high: 14.5}
+      - {age_months_min: 72,  age_months_max: 144, low: 11.5, high: 15.5}
+      - {age_months_min: 144, age_months_max: 300, low: 12.0, high: 16.5}
+
+  - id: wbc
+    name: "White blood cell count"
+    units: ["k/ul", "10*3/ul", "x10e3/ul", "thou/ul", "10^3/ul"]
+    aliases: [wbc, "white blood cell", "white count", leukocytes, leucocytes]
+    bands:
+      - {age_months_min: 0,   age_months_max: 1,   low: 9.0, high: 30.0}
+      - {age_months_min: 1,   age_months_max: 24,  low: 5.0, high: 19.5}
+      - {age_months_min: 24,  age_months_max: 144, low: 4.0, high: 17.0}
+      - {age_months_min: 144, age_months_max: 300, low: 4.0, high: 13.0}
+
+  - id: platelets
+    name: "Platelet count"
+    units: ["k/ul", "10*3/ul", "x10e3/ul", "thou/ul", "10^3/ul"]
+    aliases: [platelet, platelets, plt]
+    bands:
+      - {age_months_min: 0, age_months_max: 300, low: 150.0, high: 450.0}
+
+  - id: glucose
+    name: "Glucose"
+    units: ["mg/dl", "mg/dL"]
+    aliases: [glucose, "blood glucose", "serum glucose"]
+    # 70-110 is a FASTING range and a fax rarely says whether the child was
+    # fasting, so a random post-prandial glucose of 132 -- entirely ordinary --
+    # force-flagged nearly every paediatric glucose in the practice. The upper
+    # bound here is a diabetes-range threshold, not a fasting one; the low bound
+    # is unchanged because hypoglycaemia is urgent whenever it is measured.
+    bands:
+      - {age_months_min: 0,  age_months_max: 1,   low: 40.0, high: 180.0}
+      - {age_months_min: 1,  age_months_max: 300, low: 60.0, high: 200.0}
+
+  - id: sodium
+    name: "Sodium"
+    units: ["mmol/l", "meq/l"]
+    aliases: [sodium, na]
+    bands:
+      - {age_months_min: 0, age_months_max: 300, low: 135.0, high: 145.0}
+
+  - id: potassium
+    name: "Potassium"
+    units: ["mmol/l", "meq/l"]
+    aliases: [potassium, k]
+    bands:
+      - {age_months_min: 0,  age_months_max: 1,   low: 3.7, high: 5.9}
+      - {age_months_min: 1,  age_months_max: 300, low: 3.5, high: 5.1}
+
+  - id: bicarbonate
+    name: "Bicarbonate"
+    units: ["mmol/l", "meq/l"]
+    aliases: [bicarbonate, hco3, co2, "carbon dioxide"]
+    bands:
+      - {age_months_min: 0, age_months_max: 300, low: 20.0, high: 28.0}
+
+  - id: creatinine
+    name: "Creatinine"
+    units: ["mg/dl", "mg/dL"]
+    aliases: [creatinine, creat, cr]
+    bands:
+      - {age_months_min: 0,   age_months_max: 12,  low: 0.10, high: 0.60}
+      - {age_months_min: 12,  age_months_max: 72,  low: 0.20, high: 0.80}
+      - {age_months_min: 72,  age_months_max: 144, low: 0.30, high: 1.10}
+      - {age_months_min: 144, age_months_max: 300, low: 0.40, high: 1.30}
+
+  - id: bilirubin_total
+    name: "Total bilirubin"
+    units: ["mg/dl", "mg/dL"]
+    aliases: ["total bilirubin", "bilirubin total", tbili, "t. bili", bilirubin]
+    bands:
+      # The newborn band is deliberately wide: bilirubin in the first week is
+      # interpreted against an hour-specific nomogram, not a single range, and a
+      # rule that force-flagged every newborn bilirubin would flag them all.
+      - {age_months_min: 0, age_months_max: 1,   low: 0.0, high: 15.0}
+      - {age_months_min: 1, age_months_max: 300, low: 0.0, high: 1.2}
+
+  - id: alt
+    name: "ALT (SGPT)"
+    units: ["u/l", "iu/l"]
+    aliases: [alt, sgpt, "alanine aminotransferase"]
+    bands:
+      - {age_months_min: 0, age_months_max: 300, low: 0.0, high: 40.0}
+
+  - id: tsh
+    name: "TSH"
+    units: ["miu/l", "uiu/ml", "miu/ml"]
+    aliases: [tsh, thyrotropin, "thyroid stimulating hormone"]
+    bands:
+      - {age_months_min: 0,  age_months_max: 1,   low: 0.7, high: 15.0}
+      - {age_months_min: 1,  age_months_max: 300, low: 0.5, high: 4.5}
+
+  - id: lead
+    name: "Blood lead level"
+    units: ["mcg/dl", "ug/dl", "µg/dl"]
+    aliases: ["blood lead", "lead level", "pb", lead]
+    bands:
+      # CDC's blood lead reference value is 3.5 mcg/dL. There is no safe level;
+      # anything measurable above the reference value warrants action, which is
+      # why the upper bound is the reference value itself.
+      - {age_months_min: 0, age_months_max: 300, low: 0.0, high: 3.5}
+
+  - id: hematocrit
+    name: "Hematocrit"
+    units: ["%"]
+    aliases: [hematocrit, haematocrit, hct]
+    # Kept at roughly 3x the hemoglobin band on purpose. When the two disagreed,
+    # a self-consistent ordinary CBC -- Hgb 9.8 with Hct 29.4 at three months --
+    # was normal on one analyte and force-flagged urgent on the other.
+    bands:
+      - {age_months_min: 0,   age_months_max: 1,   low: 40.0, high: 65.0}
+      - {age_months_min: 1,   age_months_max: 6,   low: 28.0, high: 42.0}
+      - {age_months_min: 6,   age_months_max: 24,  low: 31.0, high: 41.0}
+      - {age_months_min: 24,  age_months_max: 72,  low: 33.0, high: 43.0}
+      - {age_months_min: 72,  age_months_max: 144, low: 34.0, high: 46.0}
+      - {age_months_min: 144, age_months_max: 300, low: 35.0, high: 49.0}
+
+#: Phrases that force an urgent flag on their own, whatever the model returned
+#: and whatever numbers are present. These are the words a laboratory or a
+#: hospital uses when it has already decided the result cannot wait, and they
+#: appear on documents where the number itself may be on a page OCR could not
+#: read.
+critical_phrases:
+  - "critical value"
+  - "critical result"
+  - "panic value"
+  - "called to provider"
+  - "called to the ordering provider"
+  - "phoned to"
+  - "phoned to the ordering provider"
+  - "called and read back"
+  - "read back and verified"
+  - "read back verified"
+  - "notify immediately"
+  - "life-threatening"
+  - "admitted to the pediatric intensive care"
+  - "admitted to picu"
+  - "admitted to the picu"
+  - "transferred to the emergency"
+  - "transferred to emergency"
+  - "code sepsis"
+  - "positive blood culture"
+  - "blood culture positive"
+  # "requires immediate" alone matched "Requires immediate return of the school
+  # clearance paperwork" -- an ordinary front-desk sentence, force-flagged
+  # urgent. The completions are listed rather than the stem, because an
+  # allowlist of clinical phrasings cannot be widened by a sentence nobody
+  # anticipated.
+  - "require immediate attention"
+  - "require immediate medical attention"
+  - "require immediate evaluation"
+  - "require immediate treatment"
+  - "require immediate follow-up"
+  - "require immediate follow up"
+  - "require immediate referral"
+  - "require immediate hospitalization"
+  - "require immediate hospitalisation"
+  - "require immediate admission"
+  - "require immediate transfer"
+  - "require immediate surgical evaluation"
+  - "require immediate neurosurgical evaluation"
+  - "urgent follow-up required"
+  - "please contact the family today"

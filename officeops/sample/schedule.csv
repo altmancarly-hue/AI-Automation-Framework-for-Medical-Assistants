@@ -1,0 +1,8 @@
+Chart No,Patient Name,Appt Date/Time,Provider,Appt Type,Confirmation Status,Home Phone,Preferred Language,DOB
+10231,"Torres, Mila",08/25/2026 08:20,Dr. Alvarez,Well child,Confirmed,847-555-0142,English,04/12/2024
+10877,"Nowak, Filip",08/25/2026 08:40,Dr. Alvarez,Sick,,847-555-0198,Polish,09/03/2019
+11004,"Adeyemi, Chidi",08/25/2026 09:00,Dr. Osei,Well child,Not confirmed,847-555-0177,English,01/22/2015
+11220,"Reyes, Sofia",08/25/2026 09:20,Dr. Osei,Follow-up,confirmed,847-555-0110,Spanish,06/30/2021
+11455,"Reyes, Mateo",08/25/2026 14:10,Dr. Osei,Sick,no,847-555-0110,Spanish,06/30/2021
+11901,"Petrov, Juno",08/25/2026 15:40,Dr. Alvarez,Sports physical,N,847-555-0163,English,11/08/2011
+12007,"Kim, Aera",08/24/2026 10:00,Dr. Osei,Well child,Y,847-555-0121,Korean,07/19/2013

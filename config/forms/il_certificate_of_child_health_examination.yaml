@@ -1,0 +1,884 @@
+# Illinois Certificate of Child Health Examination
+#
+# The FIELD LIST is public: it mirrors the printed sections of the state form
+# (IDPH / ISBE), and getting it right is the part that takes a day.
+#
+# The BOUNDING BOXES ARE PLACEHOLDERS. Every one carries `placeholder: true`,
+# and `TemplateStore.load()` refuses to fill this form until they are measured
+# against the real PDF and `calibration:` names who did it. See the module
+# docstring in modules/forms/templates.py for why that gate is not optional: a
+# date written 40 points low lands in the next row of the immunization grid, the
+# form then says a child had a dose they did not have, and a physician signs it.
+#
+# TO CALIBRATE: open the current IDPH PDF, measure each box in PDF points with
+# the origin at the TOP-LEFT of the page, replace x/y/width/height, delete the
+# `placeholder: true` line, and fill in `calibration:`.
+
+form_type: il_certificate_of_child_health_examination
+title: Certificate of Child Health Examination
+version: "PLACEHOLDER - record the IDPH revision date here"
+issuer: Illinois Department of Public Health / Illinois State Board of Education
+page_count: 4
+source_pdf: ""
+calibration: ""
+
+# Phrases that appear on this form and are unlikely to appear on a camp or
+# sports form. `detect.py` scores an incoming scan against these.
+anchors:
+  - "certificate of child health examination"
+  - "state of illinois"
+  - "to be completed by health care provider"
+  - "immunization record"
+  - "health history"
+  - "child's name"
+  - "diabetes screening"
+  - "lead risk questionnaire"
+  - "dental examination"
+
+fields:
+  # -- identification (page 1) ---------------------------------------
+  - name: child_last_name
+    kind: text
+    label: "Child's last name"
+    source: patient.last_name
+    transform: verbatim
+    required: true
+    box:
+      page: 1
+      x: 72
+      y: 96
+      width: 120.0
+      height: 14.0
+      placeholder: true
+
+  - name: child_first_name
+    kind: text
+    label: "Child's first name"
+    source: patient.first_name
+    transform: verbatim
+    required: true
+    box:
+      page: 1
+      x: 210
+      y: 96
+      width: 120.0
+      height: 14.0
+      placeholder: true
+
+  - name: child_middle_initial
+    kind: text
+    label: "Middle initial"
+    source: patient.middle_initial
+    transform: verbatim
+    box:
+      page: 1
+      x: 348
+      y: 96
+      width: 30
+      height: 14.0
+      placeholder: true
+
+  - name: date_of_birth
+    kind: date
+    label: "Date of birth"
+    source: patient.date_of_birth
+    transform: date_mm_dd_yyyy
+    required: true
+    box:
+      page: 1
+      x: 396
+      y: 96
+      width: 90
+      height: 14.0
+      placeholder: true
+
+  - name: sex
+    kind: text
+    label: "Sex"
+    source: patient.sex_on_record
+    transform: verbatim
+    box:
+      page: 1
+      x: 500
+      y: 96
+      width: 40
+      height: 14.0
+      placeholder: true
+
+  - name: address
+    kind: text
+    label: "Address"
+    source: patient.address
+    transform: verbatim
+    box:
+      page: 1
+      x: 72
+      y: 120
+      width: 300
+      height: 14.0
+      placeholder: true
+
+  - name: parent_guardian
+    kind: text
+    label: "Parent / guardian"
+    source: patient.guardian_name
+    transform: verbatim
+    box:
+      page: 1
+      x: 72
+      y: 144
+      width: 200
+      height: 14.0
+      placeholder: true
+
+  - name: school_district
+    kind: text
+    label: "School / district"
+    transform: verbatim
+    box:
+      page: 1
+      x: 300
+      y: 144
+      width: 200
+      height: 14.0
+      placeholder: true
+
+  # -- health history (page 1) ---------------------------------------
+  - name: allergies
+    kind: text
+    label: "Allergies"
+    source: allergies
+    transform: comma_list
+    box:
+      page: 1
+      x: 72
+      y: 200
+      width: 440
+      height: 28
+      placeholder: true
+
+  - name: current_medications
+    kind: text
+    label: "Current medications"
+    source: medications
+    transform: comma_list
+    box:
+      page: 1
+      x: 72
+      y: 236
+      width: 440
+      height: 28
+      placeholder: true
+
+  - name: chronic_conditions
+    kind: text
+    label: "Chronic health conditions"
+    source: conditions
+    transform: comma_list
+    box:
+      page: 1
+      x: 72
+      y: 272
+      width: 440
+      height: 28
+      placeholder: true
+
+  - name: lead_risk_assessed
+    kind: checkbox
+    label: "Lead risk questionnaire completed"
+    source: screenings.lead_risk_assessed
+    transform: yes_no
+    box:
+      page: 1
+      x: 72
+      y: 320
+      width: 20
+      height: 12
+      placeholder: true
+
+  - name: tb_risk_assessed
+    kind: checkbox
+    label: "TB risk questionnaire completed"
+    source: screenings.tb_risk_assessed
+    transform: yes_no
+    box:
+      page: 1
+      x: 200
+      y: 320
+      width: 20
+      height: 12
+      placeholder: true
+
+  - name: diabetes_risk_assessed
+    kind: checkbox
+    label: "Diabetes screening completed"
+    source: screenings.diabetes_risk_assessed
+    transform: yes_no
+    box:
+      page: 1
+      x: 340
+      y: 320
+      width: 20
+      height: 12
+      placeholder: true
+
+  # -- physical examination (page 2) ---------------------------------
+  - name: exam_date
+    kind: date
+    label: "Date of examination"
+    source: exam.date
+    transform: date_mm_dd_yyyy
+    required: true
+    box:
+      page: 2
+      x: 72
+      y: 96
+      width: 90
+      height: 14.0
+      placeholder: true
+
+  - name: height_in
+    kind: number
+    label: "Height (inches)"
+    source: vitals.height_in
+    transform: one_decimal
+    box:
+      page: 2
+      x: 200
+      y: 96
+      width: 60
+      height: 14.0
+      placeholder: true
+
+  - name: weight_lb
+    kind: number
+    label: "Weight (pounds)"
+    source: vitals.weight_lb
+    transform: one_decimal
+    box:
+      page: 2
+      x: 280
+      y: 96
+      width: 60
+      height: 14.0
+      placeholder: true
+
+  - name: bmi
+    kind: number
+    label: "BMI"
+    source: vitals.bmi
+    transform: one_decimal
+    box:
+      page: 2
+      x: 360
+      y: 96
+      width: 50
+      height: 14.0
+      placeholder: true
+
+  - name: bmi_percentile
+    kind: number
+    label: "BMI percentile"
+    source: vitals.bmi_percentile
+    transform: integer
+    box:
+      page: 2
+      x: 430
+      y: 96
+      width: 50
+      height: 14.0
+      placeholder: true
+
+  - name: blood_pressure
+    kind: text
+    label: "Blood pressure"
+    source: vitals.blood_pressure
+    transform: blood_pressure
+    box:
+      page: 2
+      x: 72
+      y: 124
+      width: 80
+      height: 14.0
+      placeholder: true
+
+  - name: vision_result
+    kind: text
+    label: "Vision screening"
+    source: screenings.vision
+    transform: pass_fail
+    box:
+      page: 2
+      x: 180
+      y: 124
+      width: 70
+      height: 14.0
+      placeholder: true
+
+  - name: hearing_result
+    kind: text
+    label: "Hearing screening"
+    source: screenings.hearing
+    transform: pass_fail
+    box:
+      page: 2
+      x: 280
+      y: 124
+      width: 70
+      height: 14.0
+      placeholder: true
+
+  - name: dental_exam_date
+    kind: date
+    label: "Dental examination date"
+    source: screenings.dental_exam_date
+    transform: date_mm_dd_yyyy
+    box:
+      page: 2
+      x: 380
+      y: 124
+      width: 90
+      height: 14.0
+      placeholder: true
+
+  - name: hemoglobin_or_hematocrit
+    kind: text
+    label: "Hemoglobin / hematocrit"
+    source: labs.hemoglobin
+    transform: one_decimal
+    box:
+      page: 2
+      x: 72
+      y: 152
+      width: 70
+      height: 14.0
+      placeholder: true
+
+  - name: lead_level
+    kind: text
+    label: "Blood lead level"
+    source: labs.lead_ug_dl
+    transform: one_decimal
+    box:
+      page: 2
+      x: 180
+      y: 152
+      width: 70
+      height: 14.0
+      placeholder: true
+
+  - name: activity_restrictions
+    kind: text
+    label: "Restrictions on physical activity"
+    transform: verbatim
+    human_only: true
+    box:
+      page: 2
+      x: 72
+      y: 200
+      width: 440
+      height: 28
+      placeholder: true
+
+  - name: provider_comments
+    kind: text
+    label: "Comments"
+    transform: verbatim
+    human_only: true
+    box:
+      page: 2
+      x: 72
+      y: 240
+      width: 440
+      height: 40
+      placeholder: true
+
+  # -- immunization record (page 3) ----------------------------------
+  # Each box takes a DOSE, not a date: `dose_date` reads the dose's own
+  # precision so a month-only registry entry prints as 06/2024 rather than
+  # 06/01/2024, and a dose reconciliation could not settle prints nothing.
+
+  - name: imm_dtap_1
+    kind: grid_date
+    label: "DTaP / DTP / DT - dose 1"
+    source: immunizations.dtap.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 120.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_dtap_2
+    kind: grid_date
+    label: "DTaP / DTP / DT - dose 2"
+    source: immunizations.dtap.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 120.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_dtap_3
+    kind: grid_date
+    label: "DTaP / DTP / DT - dose 3"
+    source: immunizations.dtap.2
+    transform: dose_date
+    box:
+      page: 3
+      x: 336.0
+      y: 120.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_dtap_4
+    kind: grid_date
+    label: "DTaP / DTP / DT - dose 4"
+    source: immunizations.dtap.3
+    transform: dose_date
+    box:
+      page: 3
+      x: 414.0
+      y: 120.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_dtap_5
+    kind: grid_date
+    label: "DTaP / DTP / DT - dose 5"
+    source: immunizations.dtap.4
+    transform: dose_date
+    box:
+      page: 3
+      x: 492.0
+      y: 120.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_tdap_1
+    kind: grid_date
+    label: "Tdap / Td booster - dose 1"
+    source: immunizations.tdap.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 146.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_tdap_2
+    kind: grid_date
+    label: "Tdap / Td booster - dose 2"
+    source: immunizations.tdap.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 146.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_polio_1
+    kind: grid_date
+    label: "Polio (IPV/OPV) - dose 1"
+    source: immunizations.polio.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 172.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_polio_2
+    kind: grid_date
+    label: "Polio (IPV/OPV) - dose 2"
+    source: immunizations.polio.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 172.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_polio_3
+    kind: grid_date
+    label: "Polio (IPV/OPV) - dose 3"
+    source: immunizations.polio.2
+    transform: dose_date
+    box:
+      page: 3
+      x: 336.0
+      y: 172.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_polio_4
+    kind: grid_date
+    label: "Polio (IPV/OPV) - dose 4"
+    source: immunizations.polio.3
+    transform: dose_date
+    box:
+      page: 3
+      x: 414.0
+      y: 172.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hib_1
+    kind: grid_date
+    label: "Hib - dose 1"
+    source: immunizations.hib.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 198.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hib_2
+    kind: grid_date
+    label: "Hib - dose 2"
+    source: immunizations.hib.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 198.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hib_3
+    kind: grid_date
+    label: "Hib - dose 3"
+    source: immunizations.hib.2
+    transform: dose_date
+    box:
+      page: 3
+      x: 336.0
+      y: 198.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hib_4
+    kind: grid_date
+    label: "Hib - dose 4"
+    source: immunizations.hib.3
+    transform: dose_date
+    box:
+      page: 3
+      x: 414.0
+      y: 198.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_mmr_1
+    kind: grid_date
+    label: "MMR - dose 1"
+    source: immunizations.mmr.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 224.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_mmr_2
+    kind: grid_date
+    label: "MMR - dose 2"
+    source: immunizations.mmr.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 224.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hepb_1
+    kind: grid_date
+    label: "Hepatitis B - dose 1"
+    source: immunizations.hepb.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 250.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hepb_2
+    kind: grid_date
+    label: "Hepatitis B - dose 2"
+    source: immunizations.hepb.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 250.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hepb_3
+    kind: grid_date
+    label: "Hepatitis B - dose 3"
+    source: immunizations.hepb.2
+    transform: dose_date
+    box:
+      page: 3
+      x: 336.0
+      y: 250.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_varicella_1
+    kind: grid_date
+    label: "Varicella - dose 1"
+    source: immunizations.varicella.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 276.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_varicella_2
+    kind: grid_date
+    label: "Varicella - dose 2"
+    source: immunizations.varicella.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 276.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_pcv_1
+    kind: grid_date
+    label: "Pneumococcal conjugate - dose 1"
+    source: immunizations.pcv.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 302.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_pcv_2
+    kind: grid_date
+    label: "Pneumococcal conjugate - dose 2"
+    source: immunizations.pcv.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 302.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_pcv_3
+    kind: grid_date
+    label: "Pneumococcal conjugate - dose 3"
+    source: immunizations.pcv.2
+    transform: dose_date
+    box:
+      page: 3
+      x: 336.0
+      y: 302.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_pcv_4
+    kind: grid_date
+    label: "Pneumococcal conjugate - dose 4"
+    source: immunizations.pcv.3
+    transform: dose_date
+    box:
+      page: 3
+      x: 414.0
+      y: 302.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hepa_1
+    kind: grid_date
+    label: "Hepatitis A - dose 1"
+    source: immunizations.hepa.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 328.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_hepa_2
+    kind: grid_date
+    label: "Hepatitis A - dose 2"
+    source: immunizations.hepa.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 328.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_mcv_1
+    kind: grid_date
+    label: "Meningococcal - dose 1"
+    source: immunizations.mcv.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 354.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_mcv_2
+    kind: grid_date
+    label: "Meningococcal - dose 2"
+    source: immunizations.mcv.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 354.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_ppsv_1
+    kind: grid_date
+    label: "Pneumococcal polysaccharide (PPSV23) - dose 1"
+    source: immunizations.ppsv.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 380.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_menb_1
+    kind: grid_date
+    label: "Meningococcal B - dose 1"
+    source: immunizations.menb.0
+    transform: dose_date
+    box:
+      page: 3
+      x: 180.0
+      y: 406.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  - name: imm_menb_2
+    kind: grid_date
+    label: "Meningococcal B - dose 2"
+    source: immunizations.menb.1
+    transform: dose_date
+    box:
+      page: 3
+      x: 258.0
+      y: 406.0
+      width: 72
+      height: 13
+      placeholder: true
+
+  # -- attestation (page 4) ------------------------------------------
+  - name: provider_name
+    kind: text
+    label: "Health care provider name"
+    transform: verbatim
+    human_only: true
+    box:
+      page: 4
+      x: 72
+      y: 120
+      width: 200
+      height: 14.0
+      placeholder: true
+
+  - name: provider_license
+    kind: text
+    label: "License number"
+    transform: verbatim
+    human_only: true
+    box:
+      page: 4
+      x: 300
+      y: 120
+      width: 120
+      height: 14.0
+      placeholder: true
+
+  - name: provider_signature
+    kind: signature
+    label: "Signature of health care provider"
+    transform: verbatim
+    required: true
+    human_only: true
+    box:
+      page: 4
+      x: 72
+      y: 160
+      width: 240
+      height: 24
+      placeholder: true
+
+  - name: signature_date
+    kind: date
+    label: "Date signed"
+    transform: date_mm_dd_yyyy
+    required: true
+    human_only: true
+    box:
+      page: 4
+      x: 340
+      y: 160
+      width: 90
+      height: 14.0
+      placeholder: true
+

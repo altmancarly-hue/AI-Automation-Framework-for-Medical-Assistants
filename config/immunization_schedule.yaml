@@ -1,0 +1,438 @@
+# ---------------------------------------------------------------------------
+# CDSi-lite routine childhood and adolescent immunization schedule.
+#
+# WHY THIS FILE EXISTS AS DATA AND NOT AS CODE
+#
+# README I-02 is emphatic: "Do NOT write your own schedule logic from scratch...
+# If you implement schedule logic yourself it becomes L3 and you should not,
+# because you will get it wrong."  That warning is correct, and the design here
+# takes it seriously in two ways.
+#
+#   1. There is no schedule logic in Python. `forecast.py` is a generic
+#      evaluator; every age, interval and series length lives here, where a
+#      clinician can read it, diff it, and sign off on a change without opening
+#      an editor.  An ACIP update is a pull request against a YAML file.
+#   2. This forecaster is NOT the authority by default.  `forecast.py` exposes
+#      an authority abstraction so I-CARE's own CDSi forecast can be primary
+#      and this engine runs as a cross-check that flags disagreement.  Running
+#      this engine as the sole authority requires an explicit, recorded
+#      validation run against known-good records (README I-02 risk row:
+#      "Validate against 200 known-good records before go-live"), and the
+#      outbound recall queue refuses to send until that has happened.
+#
+# SCOPE, STATED PLAINLY: this is the routine schedule for healthy children.  It
+# does NOT encode high-risk / immunocompromised indications, travel schedules,
+# outbreak-response dosing, or the full CDSi observation set.  Any patient with
+# a condition-based indication must be forecast by a clinician or by I-CARE.
+#
+# Units accepted anywhere an age or interval appears: days, weeks, months,
+# years.  Months and years are calendar-based (clamped at month end), weeks and
+# days are exact, because that is how ACIP states them.
+# ---------------------------------------------------------------------------
+
+version: "2026.08-acip-routine-lite"
+source: >-
+  ACIP routine child & adolescent immunization schedule, United States, as
+  published for 2026. Subset; see scope note above.
+
+# ACIP's four-day grace period: a dose given up to four days before the minimum
+# age or minimum interval still counts.  This is a real rule and omitting it
+# invalidates doses that every registry in the country counts as valid.
+grace_period_days: 4
+
+# The influenza season boundary used for "has had this season's dose".
+#
+# September, not July. With a July boundary a child vaccinated on 10 June is
+# COMPLETE on 30 June and DUE on 1 July -- three months before the new season's
+# vaccine is available anywhere -- and `influenza.recall_eligible` is true, so
+# the whole panel enters the outbound queue every summer.
+influenza_season_start_month: 9
+
+antigens:
+
+  hepb:
+    label: Hepatitis B
+    weight: 3.0
+    school_required: true
+    doses_required: 3
+    series:
+      - dose: 1
+        min_age: {days: 0}
+        recommended_age: {days: 0}
+        overdue_age: {months: 2}
+      - dose: 2
+        min_age: {weeks: 4}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 1}
+        overdue_age: {months: 3}
+      - dose: 3
+        min_age: {weeks: 24}
+        min_interval: {weeks: 8}
+        min_interval_from_first: {weeks: 16}
+        recommended_age: {months: 6}
+        overdue_age: {months: 9}
+
+  dtap:
+    label: DTaP
+    weight: 4.0
+    school_required: true
+    doses_required: 5
+    not_required_after: {years: 7}   # after the 7th birthday, Tdap/Td applies
+    # A 4th dose given on or after the 4th birthday completes the series; the
+    # 5th is not needed.  Encoding this is what keeps a correctly-vaccinated
+    # transferred-in 5-year-old off the recall list.
+    series_complete_when:
+      - dose: 4
+        min_age_at_dose: {years: 4}
+    series:
+      - dose: 1
+        min_age: {weeks: 6}
+        recommended_age: {months: 2}
+        overdue_age: {months: 3}
+      - dose: 2
+        min_age: {weeks: 10}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 4}
+        overdue_age: {months: 5}
+      - dose: 3
+        min_age: {weeks: 14}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 6}
+        overdue_age: {months: 7}
+      - dose: 4
+        min_age: {months: 12}
+        min_interval: {months: 6}
+        recommended_age: {months: 15}
+        overdue_age: {months: 19}
+      - dose: 5
+        min_age: {years: 4}
+        min_interval: {months: 6}
+        recommended_age: {years: 4}
+        overdue_age: {years: 5}
+
+  ipv:
+    label: Polio (IPV)
+    weight: 3.5
+    school_required: true
+    doses_required: 4
+    series_complete_when:
+      - dose: 3
+        min_age_at_dose: {years: 4}
+        min_interval_from_previous: {months: 6}
+    series:
+      - dose: 1
+        min_age: {weeks: 6}
+        recommended_age: {months: 2}
+        overdue_age: {months: 3}
+      - dose: 2
+        min_age: {weeks: 10}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 4}
+        overdue_age: {months: 5}
+      - dose: 3
+        min_age: {weeks: 14}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 6}
+        overdue_age: {months: 19}
+      - dose: 4
+        min_age: {years: 4}
+        min_interval: {months: 6}
+        recommended_age: {years: 4}
+        overdue_age: {years: 5}
+
+  hib:
+    label: Hib
+    weight: 3.0
+    school_required: true
+    not_required_after: {years: 5}
+    doses_required: 4
+    # A variant changes the whole schedule, not just the dose count. PedvaxHIB
+    # is two primary doses and a 12-15 month booster; reusing the PRP-T dose-3
+    # timing (14 weeks) against a 3-dose count both invents a false OVERDUE at
+    # 6 months and marks the series COMPLETE without the booster.
+    variants:
+      prp_omp:
+        doses_required: 3
+        series:
+          - dose: 1
+            min_age: {weeks: 6}
+            recommended_age: {months: 2}
+            overdue_age: {months: 3}
+          - dose: 2
+            min_age: {weeks: 10}
+            min_interval: {weeks: 4}
+            recommended_age: {months: 4}
+            overdue_age: {months: 5}
+          - dose: 3
+            min_age: {months: 12}
+            min_interval: {weeks: 8}
+            recommended_age: {months: 12}
+            overdue_age: {months: 16}
+      prp_t: {doses_required: 4}
+    series:
+      - dose: 1
+        min_age: {weeks: 6}
+        recommended_age: {months: 2}
+        overdue_age: {months: 3}
+      - dose: 2
+        min_age: {weeks: 10}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 4}
+        overdue_age: {months: 5}
+      - dose: 3
+        min_age: {weeks: 14}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 6}
+        overdue_age: {months: 7}
+      - dose: 4
+        min_age: {months: 12}
+        min_interval: {weeks: 8}
+        recommended_age: {months: 12}
+        overdue_age: {months: 16}
+
+  pcv:
+    label: Pneumococcal conjugate
+    weight: 3.0
+    school_required: true
+    not_required_after: {years: 5}
+    doses_required: 4
+    series:
+      - dose: 1
+        min_age: {weeks: 6}
+        recommended_age: {months: 2}
+        overdue_age: {months: 3}
+      - dose: 2
+        min_age: {weeks: 10}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 4}
+        overdue_age: {months: 5}
+      - dose: 3
+        min_age: {weeks: 14}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 6}
+        overdue_age: {months: 7}
+      - dose: 4
+        min_age: {months: 12}
+        min_interval: {weeks: 8}
+        recommended_age: {months: 12}
+        overdue_age: {months: 16}
+
+  rota:
+    label: Rotavirus
+    weight: 2.0
+    school_required: false
+    doses_required: 3
+    variants:
+      rv1: {doses_required: 2}   # Rotarix
+      rv5: {doses_required: 3}   # RotaTeq
+    # The hardest age-out in the schedule: the first dose cannot be given after
+    # 14 weeks 6 days and no dose after 8 months 0 days.  A recall that arrives
+    # a week late is worthless, which is why rotavirus carries an age-out
+    # urgency bonus far out of proportion to its antigen weight.
+    age_out:
+      max_age_first_dose: {weeks: 14, days: 6}
+      hard_age: {months: 8}
+      bonus_from: {weeks: 10}
+    series:
+      - dose: 1
+        min_age: {weeks: 6}
+        recommended_age: {months: 2}
+        overdue_age: {weeks: 10}
+      - dose: 2
+        min_age: {weeks: 10}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 4}
+        overdue_age: {weeks: 18}
+      - dose: 3
+        min_age: {weeks: 14}
+        min_interval: {weeks: 4}
+        recommended_age: {months: 6}
+        overdue_age: {weeks: 26}
+
+  mmr:
+    label: MMR
+    weight: 5.0    # highest weight: outbreak-relevant and school-blocking
+    school_required: true
+    doses_required: 2
+    series:
+      - dose: 1
+        min_age: {months: 12}
+        recommended_age: {months: 12}
+        overdue_age: {months: 16}
+      - dose: 2
+        min_age: {months: 13}
+        min_interval: {weeks: 4}
+        recommended_age: {years: 4}
+        overdue_age: {years: 5}
+
+  var:
+    label: Varicella
+    weight: 3.5
+    school_required: true
+    doses_required: 2
+    series:
+      - dose: 1
+        min_age: {months: 12}
+        recommended_age: {months: 12}
+        overdue_age: {months: 16}
+      - dose: 2
+        min_age: {months: 15}
+        # ACIP: 3 months minimum interval under 13 years, 4 weeks at 13+.
+        conditional_interval:
+          - when_age_under: {years: 13}
+            min_interval: {months: 3}
+          - default: true
+            min_interval: {weeks: 4}
+        recommended_age: {years: 4}
+        overdue_age: {years: 5}
+
+  hepa:
+    label: Hepatitis A
+    weight: 2.0
+    school_required: false
+    doses_required: 2
+    series:
+      - dose: 1
+        min_age: {months: 12}
+        recommended_age: {months: 12}
+        overdue_age: {months: 24}
+      - dose: 2
+        min_age: {months: 18}
+        min_interval: {months: 6}
+        recommended_age: {months: 18}
+        overdue_age: {months: 30}
+
+  tdap:
+    label: Tdap
+    weight: 4.0
+    school_required: true
+    doses_required: 1
+    series:
+      - dose: 1
+        min_age: {years: 7}
+        recommended_age: {years: 11}
+        overdue_age: {years: 12}
+
+  hpv:
+    label: HPV
+    weight: 3.0
+    school_required: false
+    # Two doses if the series starts before the 15th birthday, three if not.
+    # This is the single most consequential age threshold in adolescent
+    # immunization and the reason HPV carries an age-out bonus from 13: a
+    # recall that lands before the 15th birthday saves the family a third
+    # visit and a third injection.
+    conditional_series:
+      - when_age_at_first_dose_under: {years: 15}
+        doses_required: 2
+        series:
+          - dose: 1
+            min_age: {years: 9}
+            recommended_age: {years: 11}
+            overdue_age: {years: 13}
+          - dose: 2
+            min_age: {years: 9}
+            min_interval: {months: 5}
+            recommended_age: {years: 12}
+            overdue_age: {years: 13}
+      - default: true
+        doses_required: 3
+        series:
+          - dose: 1
+            min_age: {years: 9}
+            recommended_age: {years: 11}
+            overdue_age: {years: 13}
+          - dose: 2
+            min_age: {years: 9}
+            min_interval: {months: 1}
+            recommended_age: {years: 15}
+            overdue_age: {years: 16}
+          - dose: 3
+            min_age: {years: 9}
+            min_interval: {months: 4}
+            min_interval_from_first: {months: 5}
+            recommended_age: {years: 15}
+            overdue_age: {years: 16}
+    age_out:
+      series_change_age: {years: 15}
+      bonus_from: {years: 13}
+      hard_age: {years: 27}
+
+  menacwy:
+    label: MenACWY
+    weight: 3.5
+    school_required: true
+    doses_required: 2
+    series:
+      - dose: 1
+        min_age: {years: 11}
+        recommended_age: {years: 11}
+        overdue_age: {years: 12}
+      - dose: 2
+        min_age: {years: 16}
+        min_interval: {weeks: 8}
+        recommended_age: {years: 16}
+        overdue_age: {years: 17}
+
+  menb:
+    label: MenB
+    weight: 1.0
+    school_required: false
+    doses_required: 2
+    # Shared clinical decision-making, not a routine recommendation. Forecast
+    # it for the huddle sheet so a clinician can raise it in the room; never
+    # generate outbound recall for it. A text telling a family they are
+    # "overdue" for a vaccine that is a conversation, not a requirement,
+    # damages trust in every other message this system sends.
+    recall_eligible: false
+    shared_decision: true
+    series:
+      - dose: 1
+        min_age: {years: 16}
+        recommended_age: {years: 16}
+        overdue_age: {years: 19}
+      - dose: 2
+        min_age: {years: 16}
+        min_interval: {months: 1}
+        recommended_age: {years: 16}
+        overdue_age: {years: 19}
+
+  influenza:
+    label: Influenza
+    weight: 1.0
+    school_required: false
+    annual: true
+    recall_eligible: true
+    min_age: {months: 6}
+    # Seasonal: "due" means no dose since the season start, not a series count.
+    doses_required: 1
+
+  covid:
+    label: COVID-19
+    weight: 0.5
+    school_required: false
+    annual: true
+    # Guidance has changed repeatedly and is not a school requirement in
+    # Illinois. Never recalled on, and kept off the huddle sheet's DUE section:
+    # a line against every patient every day is how a clinician learns to skim
+    # the section that also contains the MMR gap.
+    recall_eligible: false
+    huddle_eligible: false
+    min_age: {months: 6}
+    doses_required: 1
+
+# Illinois school-entry checkpoints. Used only for the recall urgency bonus --
+# no clinical decision depends on them. Ages are the typical age at the START of
+# that grade; the bonus applies to school-required antigens as the August
+# deadline approaches.
+school_checkpoints:
+  - grade: "K"
+    typical_age_years: 5
+  - grade: "6"
+    typical_age_years: 11
+  - grade: "9"
+    typical_age_years: 14
+  - grade: "12"
+    typical_age_years: 17
+school_year_start_month: 8
+school_year_start_day: 15

@@ -1,0 +1,30 @@
+# Biologically implausible value (BIV) bounds, as z-scores against the CDC
+# reference. A measurement outside these is a data-entry error, not a finding.
+#
+# WHY THIS FILE EXISTS: without it, 11.0 kg keyed as 110 kg for a two-year-old
+# produced z = +10.2, a percentile of 100, and a "! weight for age crossed 4
+# major channel(s) up" line at the top of the brief -- a transposed decimal
+# rendered as the most urgent item on the screen.
+#
+# These are the CDC/WHO modified-z BIV cutoffs used in the CDC growth-chart
+# SAS/Stata programs. They are DATA and they are reviewable: a practice whose
+# population genuinely runs outside them (a tertiary metabolic clinic, say)
+# edits this file rather than the code.
+#
+# A value outside these bounds is not clamped, not dropped and not rounded --
+# it raises, and the batch puts a line on the brief naming the measurement.
+# Hard constraint 3: route to a human, never guess.
+
+source: "CDC growth-chart program modified-z biologically implausible value cutoffs"
+review:
+  owner: "UNASSIGNED - assign before production use"
+  last_reviewed: "2026-08-22"
+
+bounds:
+  weight_for_age:               {z_min: -5.0, z_max:  8.0}
+  length_for_age:               {z_min: -5.0, z_max:  4.0}
+  stature_for_age:              {z_min: -5.0, z_max:  4.0}
+  head_circumference_for_age:   {z_min: -5.0, z_max:  5.0}
+  bmi_for_age:                  {z_min: -4.0, z_max:  8.0}
+  weight_for_length:            {z_min: -4.0, z_max:  8.0}
+  weight_for_stature:           {z_min: -4.0, z_max:  8.0}
