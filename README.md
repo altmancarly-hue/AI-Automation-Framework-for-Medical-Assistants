@@ -82,18 +82,13 @@ credibility when the first invoice arrives.
 
 ## 1. Executive Summary
 
-### The Situation
-
-The practice's operating stack is, by observable evidence, substantially manual:
+Some examples still seen in a practice's operating stack:
 
 - Scheduling is telephone-only; the public instruction is to call between 9am and 5pm.
 - Intake forms are distributed as downloadable PDFs to be printed and hand-carried.
 - Two active inbound fax lines are published as primary document channels.
 - After-hours coverage runs through a human answering service.
 - No patient portal is surfaced on the public site.
-- The published payer list is dated **January 2016**.
-- A $25 no-show fee with a 10:00am cancellation cutoff is enforced — a policy that
-  exists precisely because no-shows are an unsolved operational problem.
 
 Each of those is a signal of manual labor absorbing clinical staff time. In a
 practice this size, the Medical Assistant is the shock absorber for all of it.
