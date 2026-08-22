@@ -3651,6 +3651,6 @@ paper with structured data that can be queried, audited, and improved.
 
 ---
 
-*Prepared by Carly Altmanl · August 2026*
+*Prepared by Carly Altman · August 2026*
 *Pricing verified August 2026 from public vendor materials; confirm directly before contracting.*
 *This document contains no protected health information.*
