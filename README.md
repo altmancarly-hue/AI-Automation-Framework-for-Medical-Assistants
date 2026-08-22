@@ -1,4 +1,4 @@
-# AI & Automation Program Guide [Medical Assistant Role]
+# AI Automation Program Guide [Medical Assistant Role]
 
 **A workflow-by-workflow implementation plan for automating the Medical Assistant role in a small independent pediatric practice.**
 
