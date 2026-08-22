@@ -1,6 +1,6 @@
-# AI & Automation Program Guide
+# AI & Automation Program Guide [Medical Assistant]
 
-**A workflow-by-workflow implementation plan for automating the Medical Assistant / LPN role in a small independent pediatric practice.**
+**A workflow-by-workflow implementation plan for automating the Medical Assistant role in a small independent pediatric practice.**
 
 Author: Carly Altman
 Version: 1.0
