@@ -1,12 +1,117 @@
-# AI Automation Framework for Medical Assistants
+# AI & Automation for the Medical Assistant Role
 
-**A workflow-by-workflow implementation plan for automating the Medical Assistant role in a small independent pediatric practice.**
+### A workflow-by-workflow implementation guide for small independent pediatric practices
 
 Author: Carly Altman
-Version: 1.0
-Date: 2026-08-21
-Audience: Practice Owner / Office Manager / Physician Partners
-Classification: Public — Contains no PHI
+Version: 2.0
+Date: 2026-08-22
+Audience: Practice Owner / Office Manager / Physician Partners / Medical Assistants
+Reference practice: North Suburban Pediatrics, Buffalo Grove, Illinois
+Classification: Contains no PHI
+
+---
+
+> **Looking for the code?** A working local-first Python implementation of the
+> initiatives below lives in this repository — **all ten, 934 tests, 0
+> failures.** Start at [IMPLEMENTATION.md](IMPLEMENTATION.md) for the layout,
+> quick start, per-module status and the list of things that are deliberately
+> fail-closed until a clinician signs off on them.
+>
+> Alongside it, `officeops/` is a **no-AI** layer: 16 deterministic CLI tasks and
+> 3 PowerShell scripts that do office work with no model and no network. It adds
+> to the framework above; it replaces none of it.
+
+## What This Document Is
+
+This is a practical guide to automating the administrative work that surrounds
+the Medical Assistant role in a small independent pediatric practice — a
+two-to-fifteen-provider group with no IT department, one EHR it did not choose,
+and a fax machine it cannot switch off.
+
+It is written for a specific and common situation: a practice where the clinical
+care is excellent and the paperwork is drowning it. It does not ask you to
+replace your EHR, change your clinical workflow, or believe anything about
+artificial intelligence. It works through the job one task at a time and, for
+each, asks a plain question — *what would it take to stop doing this by hand?* —
+and then answers it with a named product, a named cost, and arithmetic you can
+check.
+
+## The Job This Is About
+
+In a practice this size the Medical Assistant is not one job. It is six,
+interleaved, all day:
+
+| The MA is doing | And it looks like |
+| --- | --- |
+| **Rooming and vitals** | Height, weight, head circumference, BP, plotting growth, updating medications and allergies, screening questionnaires |
+| **Telephone triage** | Taking the call, working a protocol, giving advice under standing order, documenting it afterwards — usually much later |
+| **Immunizations** | Reconciling the chart against the state registry, determining what is due, drawing up, administering, documenting, logging the lot |
+| **Forms** | School, daycare, sports, camp, WIC, medication authorization, prior authorization — transcribing the same twelve facts onto a fortieth different layout |
+| **Chasing** | Results that never came back, referrals with no consult note, prior auths, records requests, faxes with no cover sheet |
+| **Everything the front desk hands over** | Confirmations, reschedules, waitlist calls, interpreter bookings, insurance questions |
+
+Almost none of that is clinical judgement. Almost all of it is **transcription,
+lookup, and chasing** — moving facts from one place to another and noticing when
+something did not come back. That is the work this guide is about.
+
+The clinical judgement — which protocol applies, what the disposition is, whether
+this child needs to be seen — stays with the human, and in Illinois it has to:
+under 225 ILCS 60/54.2 an unlicensed MA's clinical authority is delegated from a
+physician who must be on the premises. No software changes that, and this guide
+never proposes software that pretends otherwise.
+
+## How This Helps Everyone, Not Just the MA
+
+Automation pitched as "saving MA time" usually fails, because the time saved is
+absorbed by the next interruption and nobody can point at it. The honest case is
+that each of these workflows has a **different beneficiary**, and they compound:
+
+| Who | What actually changes |
+| --- | --- |
+| **The medical assistant** | Stops retyping. The recurring paperwork — fridge logs, expiry lists, outstanding labs, confirmation calls — arrives as a work list instead of a memory test. Documentation happens during the call, not at 6:40pm. |
+| **The physician** | Walks into the room already knowing what happened at the last three visits, what is due today, and whether this child is crossing growth percentiles. Fewer "give me a second, let me find it" moments in front of a family. |
+| **The front desk** | Gets a confirmation list sorted by who to call first, a filled cancellation instead of an empty slot, and an interpreter booked once per language instead of four times or never. |
+| **The biller** | Gets eligibility verified before the visit rather than a denial after it, and a denial worklist ranked by dollars instead of by date received. |
+| **The parent** | Gets a text they can reply to, a form that is already filled in, a call back that is actually logged, and a practice that notices when the specialist never sent the report. |
+| **The practice owner** | Gets a documented, auditable version of processes that currently live in one twenty-year employee's head — which is a continuity problem long before it is an efficiency one. |
+| **A new hire** | Gets a checklist instead of an apprenticeship. This is the quietest benefit and possibly the largest: the current process works because experienced MAs are good at it, and that does not scale to the next hire. |
+
+## Two Halves, and Which One to Do First
+
+This guide has two distinct halves, and mixing them up is the most common way a
+programme like this stalls.
+
+**Section 11 is the half that needs no AI at all.** Roughly fifty recurring
+office tasks — vaccine fridge logs, expiry sweeps, outstanding-lab chasing,
+credential tracking, confirmation lists, denial worklists — that are pure
+arithmetic over an export the practice can already produce. No vendor, no
+contract, no BAA, no monthly cost, no model to validate. Sixteen of them ship as
+runnable code in this repository. **Start here.** It is deployable in an
+afternoon, it produces the clean exports and measured baselines the rest of the
+work needs, and it earns the credibility that funds everything after it.
+
+**Sections 5 through 10 are the half that uses AI**, and only where the input is
+genuinely unstructured human language: a transcribed phone call, three visit
+notes, a scanned fax, a form nobody has a template for. Every one of those is
+draft-and-review — the machine produces a draft, a licensed human reviews and
+signs it, and the audit trail records both. Nothing is auto-released to a chart
+or to a patient without a human approval event.
+
+The two halves are complementary, not alternatives. If you only ever do
+Section 11, you will still be materially better off.
+
+## A Note on Honesty
+
+Every dollar figure here is **modeled, not measured**, and every calculation is
+shown in full so any assumption can be challenged and re-run. Section 10 defines
+how to replace each modeled input with a measured one during the first sixty
+days. Treat the ROI as a hypothesis to be tested. A proposal that presents
+modeled savings as certainty is the fastest way to lose credibility when the
+first invoice arrives.
+
+Where a workflow does **not** need AI, this document says so plainly and tells
+you to use a rules engine instead. Six of the ten initiatives in Section 5 fall
+into that category, and all fifty tasks in Section 11 do.
 
 ---
 
@@ -33,6 +138,16 @@ Classification: Public — Contains no PHI
 - [8. Vendor & Cost Reference Table](#8-vendor--cost-reference-table)
 - [9. Governance, Policy & Risk Register](#9-governance-policy--risk-register)
 - [10. Measurement Plan & KPIs](#10-measurement-plan--kpis)
+- [11. The No-AI Layer — Office Tasks That Need Only Python or PowerShell](#11-the-no-ai-layer--office-tasks-that-need-only-python-or-powershell)
+  - [11.1 Why This Section Comes First in Practice](#111-why-this-section-comes-first-in-practice)
+  - [11.2 The Full Task Catalog](#112-the-full-task-catalog)
+  - [11.3 The Sixteen That Ship as Working Code](#113-the-sixteen-that-ship-as-working-code)
+  - [11.4 Command Reference](#114-command-reference)
+  - [11.5 Adapting to Your EHR's Export](#115-adapting-to-your-ehrs-export)
+  - [11.6 Scheduling, Exit Codes and Alerting](#116-scheduling-exit-codes-and-alerting)
+  - [11.7 Phasing — Four Weeks, Then a Month, Then a Quarter](#117-phasing--four-weeks-then-a-month-then-a-quarter)
+  - [11.8 Quantified Benefit](#118-quantified-benefit)
+  - [11.9 Risks & Controls](#119-risks--controls)
 - [Appendix A — Sample System Prompts](#appendix-a--sample-system-prompts)
 - [Appendix B — Sample Orchestration Workflow](#appendix-b--sample-orchestration-workflow)
 - [Appendix C — Vendor Due Diligence Checklist](#appendix-c--vendor-due-diligence-checklist)
@@ -82,7 +197,7 @@ credibility when the first invoice arrives.
 
 ## 1. Executive Summary
 
-Some examples still seen in a practice's operating stack:
+Its operating stack is, by publicly observable evidence, substantially manual:
 
 - Scheduling is telephone-only; the public instruction is to call between 9am and 5pm.
 - Intake forms are distributed as downloadable PDFs to be printed and hand-carried.
@@ -90,8 +205,19 @@ Some examples still seen in a practice's operating stack:
 - After-hours coverage runs through a human answering service.
 - No patient portal is surfaced on the public site.
 
-Each of those is a signal of manual labor absorbing clinical staff time. In a
-practice this size, the Medical Assistant is the shock absorber for all of it.
+**None of that is unusual, and that is the point.** Independent pediatric
+practices of this size share a recognizable profile: a clinical operation that
+works, wrapped in an administrative one that has accreted over decades. Phones
+instead of a portal. Fax as a first-class document channel. A payer list that
+has not been refreshed because refreshing it is nobody's job. Paper forms
+because the EHR's form module was never configured. And in the middle of it, the
+Medical Assistant absorbing every gap between systems that do not talk to each
+other.
+
+If your practice looks materially different — a well-configured portal, no fax,
+a modern scheduling stack — several initiatives below shrink or disappear, and
+Section 2 tells you which inputs to change to see that. If it looks like this
+one, the model transfers with the volumes adjusted.
 
 ### The Thesis
 
@@ -156,6 +282,13 @@ paper with structured data. The LLM is a component, not the strategy.
 
 Anyone selling this practice an "AI transformation" that leads with a chatbot
 is selling the wrong thing.
+
+**And there is a whole layer beneath even that.** [Section 11](#11-the-no-ai-layer--office-tasks-that-need-only-python-or-powershell)
+catalogs roughly fifty recurring office tasks that need no AI whatsoever — no
+vendor, no contract, no BAA, no monthly cost — just Python or PowerShell over an
+export the practice can already produce. Sixteen ship as working code. That
+layer is deployable in an afternoon, it costs nothing, and doing it first is
+what makes the ten initiatives above credible when you ask to fund them.
 
 ---
 
@@ -1667,13 +1800,6 @@ makes the rest of the program credible internally.
 
 #### Current State
 
-The practice publishes two fax numbers — 847-913-9173 for Buffalo Grove and
-847-869-1070 for Evanston — as primary document channels. In ambulatory medicine
-this remains the default transport for specialist consult notes, hospital
-discharge summaries, imaging and lab results from outside facilities, prior
-authorization correspondence, records requests, school and camp forms, and
-insurance correspondence.
-
 Current handling:
 
 1. Fax arrives, printed or landing in an inbox.
@@ -2528,26 +2654,6 @@ APPEAL DRAFTING TIME
 | Clearinghouse outage | Low | Degrade to manual verification; do not block check-in |
 | Payer table drifts stale again | Medium | Automated quarterly review task with a named owner; website generated from the table so staleness is visible |
 
-#### Proposal
-
-The January 2016 date on the public insurance list is the tell. It is not
-negligence — it is what happens when maintaining a payer list is nobody's
-specific job and there is no system that makes staleness visible.
-
-That single stale artifact represents a real cost. A family checks the website,
-sees their plan, books an appointment, arrives, and discovers the practice
-dropped that plan six years ago. Somebody has to have that conversation at the
-front desk with a sick child in the waiting room. Some portion of those visits
-get written off. All of them damage the relationship.
-
-The pediatric-specific angle strengthens the case. The practice already
-acknowledges a common billing surprise: a well visit that addresses a problem may
-generate an additional sick-visit charge. That is correct coding and it is also
-the most frequent source of pediatric billing complaints nationally. A system
-that surfaces the family's actual copay, deductible status, and network status
-*before* the visit lets the front desk set expectations rather than deliver
-surprises.
-
 The honest framing for this initiative: **it is less an AI project than a
 revenue-cycle hygiene project with two small AI components.** It is included
 because it is genuinely worth doing and because a program that only funds the
@@ -3092,6 +3198,38 @@ runs in parallel.
 already at capacity.** Every failed practice-automation program shares this root
 cause.
 
+### 7.3 Before Phase 0 — The No-AI Layer
+
+[Section 11](#11-the-no-ai-layer--office-tasks-that-need-only-python-or-powershell)
+describes roughly fifty office tasks that need no model, no vendor and no
+budget, sixteen of which ship as working code. That work sits **ahead of Phase
+0**, not inside it, for three reasons:
+
+1. **It depends on nothing.** No contract, no BAA, no model validation, no
+   security review. It can start the week this document is read.
+2. **It produces Phase 0's discovery output as a by-product.** Section 10 asks
+   you to replace modeled inputs with measured ones in the first sixty days.
+   Confirmation rate, outstanding labs and referrals, denial mix, screening
+   capture and no-show rate all fall out of these scripts. Phase 0's
+   time-and-motion study gets much easier when half its numbers already exist.
+3. **It is the credibility argument for everything after it.** A programme that
+   opens by asking for $52,000 gets deferred. A programme that opens with a
+   working expiry report that found six expired doses in the fridge, at zero
+   cost, gets funded.
+
+| | Section 11 layer | Phases 0–4 (Sections 5–10) |
+| --- | --- | --- |
+| Starts | Immediately | After discovery and contracting |
+| Cost | $0 | $36,901/yr + $52k–68k one-time |
+| Needs a BAA | No — nothing leaves the building | Yes, per vendor |
+| Needs a model validated | No | Yes |
+| Risk if it fails | A list is wrong; somebody notices | A clinical document is wrong |
+| Owner | Whoever is comfortable with a scheduled job | Program Owner + technical lead |
+
+Run the two in parallel from Phase 1 onward. The Section 11 scripts are also
+what **measure** whether the Section 5 initiatives worked: `charge-reconcile`
+and `denial-worklist` test I-09's claims, and `confirm-list` tests I-07's.
+
 ---
 
 ## 8. Vendor & Cost Reference Table
@@ -3343,6 +3481,595 @@ substantially worse than the manual process it replaced.
 | Financial realization vs. model | Partners | Monthly |
 | Vendor and BAA review | Practice Manager, Counsel | Annually |
 | Full program review with re-baselined ROI | Partners | Quarterly |
+
+---
+
+## 11. The No-AI Layer — Office Tasks That Need Only Python or PowerShell
+
+### 11.1 Why This Section Comes First in Practice
+
+Everything in Sections 5 through 10 requires something the practice does not
+have yet: a vendor contract, a BAA, a model to validate, a review process, a
+budget line. Those are all worth doing. None of them can start on Tuesday.
+
+This section is the part that can. It catalogs the recurring office work that is
+**pure arithmetic over an export the practice already produces** — dates, counts,
+lookups, and noticing when something did not come back. No model. No network
+call. No vendor. No monthly cost. No PHI leaving the building, which means no
+BAA and no security review, because there is nothing to review: the scripts run
+on a practice machine against a practice file and make no outbound connections
+of any kind.
+
+Three arguments for doing it first, in ascending order of how much they matter:
+
+**It is free and it is fast.** Sixteen of these ship as working code in this
+repository. `make officeops-selftest` runs all sixteen against bundled sample
+data in under a second. A practice can be running the vaccine fridge log and the
+outstanding-labs list this week.
+
+**It produces the inputs the AI half needs anyway.** Section 10 asks you to
+replace modeled numbers with measured ones in the first sixty days. Almost every
+one of those measurements — confirmation rate, no-show rate, outstanding
+referrals, denial mix, screening capture — falls out of a script in this section
+as a by-product. You cannot show a 40% improvement in something you never
+counted.
+
+**It is the credibility argument.** A programme that opens by asking for
+$52,000 and a fourteen-month roadmap is a programme that gets deferred. A
+programme that opens with "here is the vaccine expiry list that found six
+expired doses in the fridge last Tuesday, it cost nothing, and here is what we
+could do next" is a programme that gets funded. Do the free half first, in
+public, and let it argue for the rest.
+
+> **This layer does not replace anything in Sections 5–10.** The two halves are
+> complementary. Telephone triage documentation still needs speech recognition
+> and structured extraction; a fax still needs OCR and classification; a
+> pre-visit brief still needs somebody to read three notes. Those are genuinely
+> unstructured-language problems and no amount of Python fixes them. What this
+> section removes is the *other* work — the counting and chasing that has been
+> quietly filed under "the MA will handle it".
+
+---
+
+### 11.2 The Full Task Catalog
+
+Fifty tasks, grouped by whose day they are in. **SHIPS** marks the nineteen
+that are implemented and tested — sixteen Python tasks in `officeops/` plus
+three PowerShell scripts. The rest are scoped, and each is a few hours of work
+along the same pattern.
+
+Effort is for someone comfortable with Python: **XS** under an hour, **S** half
+a day, **M** one to two days.
+
+#### Front desk and scheduling
+
+| # | Task | Replaces | Input | Effort | |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Confirmation call list | Reading down tomorrow's schedule looking for blanks | Schedule export | XS | **SHIPS** |
+| 2 | Per-provider day sheets | Printing the schedule and highlighting it by hand | Schedule export | XS | **SHIPS** |
+| 3 | Well-visit recall list | "We should call the families we haven't seen" | Patient roster with last well visit | XS | **SHIPS** |
+| 4 | Interpreter needs by language | Discovering at 9:05 that nobody booked one | Schedule + preferred language | XS | **SHIPS** |
+| 5 | Waitlist / cancellation candidates | Calling down a paper list | Schedule + waitlist export | S | |
+| 6 | New-patient packet assembly | Collating and stamping PDFs by hand | Patient demographics + PDF forms | S | |
+| 7 | Reminder file for the messaging vendor | Manual upload, manual de-duplication | Schedule + consent/opt-out list | S | |
+| 8 | Birthday / age-milestone list | Nobody notices a child turned 4 | Roster with DOB | XS | |
+| 9 | Double-book and open-slot audit | Eyeballing next week's template | Schedule export | S | |
+| 10 | Front-desk phone log summary | "It feels busy at lunch" | Phone system call log export | S | |
+
+#### Clinical / medical assistant
+
+| # | Task | Replaces | Input | Effort | |
+| --- | --- | --- | --- | --- | --- |
+| 11 | Vaccine storage temperature review | Reading a logger export by eye | Data-logger CSV | S | **SHIPS** |
+| 12 | Vaccine inventory and expiry | A whiteboard and a memory | Inventory export | XS | **SHIPS** |
+| 13 | Outstanding labs | "Did that lead level ever come back?" | Orders export | XS | **SHIPS** |
+| 14 | Outstanding referrals | Nobody notices the consult note never arrived | Orders export | XS | **SHIPS** |
+| 15 | CLIA-waived QC completeness | The binder, checked at inspection time | QC log export | S | **SHIPS** |
+| 16 | Expiry sweep across every inventory | Three spreadsheets, three people | Any inventory CSVs | XS | **SHIPS** |
+| 17 | Growth-entry plausibility check | A transposed decimal reaching a chart | Vitals export | S | |
+| 18 | Immunization registry file prep and validation | Hand-fixing a rejected upload | Immunization export | M | |
+| 19 | Sterilizer / autoclave spore-test log | A logbook nobody audits until survey day | Spore test log | XS | |
+| 20 | Emergency kit check log | A monthly task that slips | Kit inventory | XS | |
+| 21 | Screening capture rate by age band | Nobody knows the miss rate | Encounter + procedure export | S | |
+| 22 | Nebulizer / equipment maintenance schedule | A sticker on the machine | Equipment list | XS | |
+| 23 | Sample closet dispense log reconciliation | Untracked samples | Dispense log | S | |
+| 24 | Rooming checklist generator by visit type | Institutional memory | Visit-type table | XS | |
+
+#### Compliance, HR and administration
+
+| # | Task | Replaces | Input | Effort | |
+| --- | --- | --- | --- | --- | --- |
+| 25 | Credential and training expiry | A spreadsheet the office manager owns | Staff credential export | XS | **SHIPS** |
+| 26 | Standing-order delegation roster | A binder | Delegation roster | S | **SHIPS** |
+| 27 | Records retention horizon | Nothing; records accumulate forever | Records index | S | **SHIPS** |
+| 28 | Mail merge that refuses blank placeholders | Word merge, unchecked | Template + recipient CSV | XS | **SHIPS** |
+| 29 | Records-request (ROI) turnaround tracker | A folder on someone's desk | Request log | S | |
+| 30 | OSHA / HIPAA annual training roster | An email nobody answers | HR roster | XS | |
+| 31 | Policy review-date tracker | Policies dated 2016 | Policy index | XS | |
+| 32 | Incident and near-miss log summary | A paper form in a drawer | Incident log | XS | |
+| 33 | Vendor BAA expiry and inventory | Nobody knows how many there are | Vendor list | XS | |
+| 34 | Payer contract and fee-schedule diff | Discovering a rate change in a denial | Two fee-schedule exports | S | |
+| 35 | Duplicate patient detection | Two charts, one child | Patient roster | M | |
+| 36 | Address and phone hygiene | Returned mail, failed texts | Patient roster | S | |
+
+#### Revenue cycle
+
+| # | Task | Replaces | Input | Effort | |
+| --- | --- | --- | --- | --- | --- |
+| 37 | Charge capture reconciliation | The quietest revenue leak there is | Visit + charge exports | S | **SHIPS** |
+| 38 | Denial worklist by dollars and by frequency | Working denials in the order they arrived | Denial / ERA export | S | **SHIPS** |
+| 39 | Aging bucket worklist | A report nobody reads | AR export | S | |
+| 40 | Eligibility batch file prep | One patient at a time on a payer portal | Schedule + payer list | M | |
+| 41 | ERA (835) posting exception list | Manual reconciliation | 835 files | M | |
+| 42 | Credit balance / refund due list | A compliance exposure that grows | AR export | S | |
+| 43 | Missing-modifier pattern report | Repeating the same denial monthly | Charge + denial exports | S | |
+
+#### IT, security and continuity (PowerShell)
+
+| # | Task | Replaces | Input | Effort | |
+| --- | --- | --- | --- | --- | --- |
+| 44 | PHI share access audit | An assumption | Windows ACLs | S | **SHIPS** |
+| 45 | Backup health check | A green tick in a vendor console | Backup folder + event log | S | **SHIPS** |
+| 46 | Scheduled-task registration for the above | Running scripts by hand, then not | — | XS | **SHIPS** |
+| 47 | Workstation patch and AV compliance | "IT handles it" | WMI / Defender status | S | |
+| 48 | Offboarding checklist and account audit | An account that stays live for a year | AD user list | S | |
+| 49 | Secure-file-drop cleanup | Faxes and scans accumulating on a share | Folder listing | XS | |
+| 50 | Weekly operations rollup | Six reports nobody assembles | The outputs of everything above | S | |
+
+---
+
+### 11.3 The Sixteen That Ship as Working Code
+
+```bash
+make officeops              # list every task with its input and output
+make officeops-selftest     # run all sixteen against bundled sample data
+make test-officeops         # the test suite
+```
+
+```
+officeops selftest -- every task against the bundled sample data
+
+  PASS  confirm-list           4 finding(s)
+  PASS  day-sheets             2 finding(s)
+  PASS  recall-list            2 finding(s)
+  PASS  interpreter-list       3 finding(s)
+  PASS  fridge-log             3 finding(s)
+  PASS  vaccine-inventory      4 finding(s)
+  PASS  lab-followup           2 finding(s)
+  PASS  referral-followup      1 finding(s)
+  PASS  qc-log                18 finding(s)
+  PASS  expiry-sweep           4 finding(s)
+  PASS  credential-tracker     4 finding(s)
+  PASS  standing-orders        5 finding(s)
+  PASS  retention-sweep        1 finding(s)
+  PASS  mail-merge             1 finding(s)
+  PASS  charge-reconcile       2 finding(s)
+  PASS  denial-worklist        8 finding(s)
+
+16/16 tasks ran.
+```
+
+Three rules every one of them follows, and each exists because of a specific way
+this kind of script normally fails:
+
+**Column names are configuration, not code.** Every EHR exports the same facts
+under different headers — `Appt Date`, `APPOINTMENT_DATE`, `appt_dt`. Aliases
+live in `officeops/mappings/*.yaml`; matching ignores case, spaces, underscores
+and punctuation. When a task cannot find a column it prints what it looked for
+*and* what your file actually has. **You fix the mapping, never the export** —
+the export is regenerated every day by somebody who will not remember to rename
+a column.
+
+**Read-only unless asked.** Nothing writes to practice files. `--write` saves a
+dated CSV and a text report to an output directory. A script that quietly
+rewrites the export it was handed cannot be run twice.
+
+**Refusals are loud, and "loud" means the exit code.** A missing column, an
+unparseable date, a row with no patient — reported with the row number, never
+dropped, and **any unreadable row makes the whole run exit 2**. So does a
+missing input file, a malformed mapping, or a CSV whose parsed row count falls
+short of its physical line count (one unbalanced quote makes the reader swallow
+everything after it). A report that silently skipped 12% of its input is worse
+than no report, because somebody will act on the 88% and believe it was all of
+it.
+
+A fourth rule, which the other three imply: **a column that decides the answer
+is required, not optional.** `confirm-list` refuses an export with no
+confirmation column rather than reporting every patient as unconfirmed and a
+confirmation rate of 0% — a number §11.7 would otherwise hand to I-07 as a
+*measured* baseline. `recall-list` refuses a roster with no last-well-visit
+column rather than listing the entire panel as never seen, which is a mailing.
+
+---
+
+### 11.4 Command Reference
+
+Every task accepts `--write`, `--out DIR`, `--json`, `--mapping FILE` and
+`--today YYYY-MM-DD` (which re-runs a past day and makes the output reproducible).
+
+#### Front desk
+
+```bash
+# Who has not confirmed tomorrow, sorted by appointment time
+python3 -m officeops confirm-list schedule.csv
+python3 -m officeops confirm-list schedule.csv --days-ahead 2 --write
+python3 -m officeops confirm-list schedule.csv --include-confirmed
+
+# Printable per-provider day sheets
+python3 -m officeops day-sheets schedule.csv --write
+
+# Children overdue for a well visit, worst first
+python3 -m officeops recall-list roster.csv
+python3 -m officeops recall-list roster.csv --overdue-months 18 --max-age-years 18 --write
+
+# Interpreter needs, grouped by language
+python3 -m officeops interpreter-list schedule.csv
+python3 -m officeops interpreter-list schedule.csv --english "english,en,eng,none"
+```
+
+Sorted by time rather than by name on purpose: whoever works the confirmation
+list is filling the front of the day first, and an unconfirmed 8:20 deserves ten
+minutes more attention than an unconfirmed 4:40. The recall threshold defaults
+to **fifteen** months rather than twelve, because a family arriving at 12½
+months is not overdue and a list that says they are teaches the front desk to
+ignore it.
+
+#### Clinical
+
+```bash
+# Vaccine storage: excursions AND days with too few readings
+python3 -m officeops fridge-log logger_export.csv
+python3 -m officeops fridge-log freezer.csv --freezer --write
+python3 -m officeops fridge-log logger.csv --min-c 2 --max-c 8 --expect-readings-per-day 2
+python3 -m officeops fridge-log logger.csv --unit "Fridge 2"
+
+# Expired and expiring lots, split by funding source (VFC vs private stock)
+python3 -m officeops vaccine-inventory inventory.csv --warn-days 60 --write
+
+# Orders with nothing back
+python3 -m officeops lab-followup orders.csv --days 14
+python3 -m officeops referral-followup orders.csv --days 30 --write
+
+# CLIA-waived QC: the days with NO control recorded
+python3 -m officeops qc-log qc.csv --days 30 --tests strep,flu,urine --skip-weekends
+
+# Expiry across every inventory the practice keeps, in one pass
+python3 -m officeops expiry-sweep crash_cart.csv sample_closet.csv supplies.csv --write
+```
+
+Sample output:
+
+```
+==============================================================================
+vaccine storage temperature review  (2026-08-22 06:55)
+==============================================================================
+
+1 excursion(s) and 1 under-logged day(s) across 13 readings.
+
+  readings                               13
+  days covered                           7
+  readings out of range                  2
+  excursion events                       1
+  days under logged                      1
+  range c                                2.0 to 8.0
+
+2 item(s):
+
+  KIND       UNIT      START             END               MINUTES  WORST C  DETAIL
+  ---------  --------  ----------------  ----------------  -------  -------  ------------------------
+  EXCURSION  Fridge 1  2026-08-20 16:00  2026-08-21 16:00  1440     10.4     outside 2.0 to 8.0 C
+  LOG GAP    unit-1    2026-08-19        2026-08-19        0        -        1 reading(s), expected 2
+```
+
+That second line is the point of the whole script. CDC's Vaccine Storage and
+Handling Toolkit asks for twice-daily readings; **a gap in the log is not a
+clean day, it is an unmonitored one**, and it is what turns a power cut into a
+whole-fridge loss nobody can bound. A logger's own software shows you the days
+that are there.
+
+`expiry-sweep` takes several files deliberately: the emergency kit, the sample
+closet and the supply room are three spreadsheets maintained by three people,
+and the one that gets forgotten is never the one somebody is currently looking
+at.
+
+#### Compliance and administration
+
+```bash
+# Licences, CPR, CME, OSHA and HIPAA training coming due
+python3 -m officeops credential-tracker credentials.csv --warn-days 90 --write
+
+# Delegation roster: stale signatures and unnamed supervising physicians
+python3 -m officeops standing-orders standing_orders.csv --review-months 12
+
+# Records past the retention horizon — a REVIEW LIST, never a deletion
+python3 -m officeops retention-sweep records_index.csv --minor-until-age 22 --adult-years 10
+
+# Letters, refusing to post a blank placeholder
+python3 -m officeops mail-merge recall_letter.txt recipients.csv --write
+python3 -m officeops mail-merge letter.txt recipients.csv --allow-blank
+```
+
+`standing-orders` exists because of 225 ILCS 60/54.2. An unlicensed medical
+assistant in Illinois acts under physician delegation, so a standing order with
+no current signature is not a paperwork gap — **it is an MA performing a task
+with no documented authority to perform it**, which is precisely what an audit
+looks for. The script reports what the roster says and how old each signature
+is; it decides nothing.
+
+`retention-sweep` deletes nothing and cannot delete anything. Retention varies
+by record type, by litigation hold, and by whether a patient has an outstanding
+records request — none of which is in a records index. The Illinois defaults
+(735 ILCS 5/13-212: a minor's action may be brought until age 22) are arguments,
+not constants. It is a deadline calculator, not a legal opinion.
+
+`mail-merge` refuses any row with an unfilled placeholder unless you say
+`--allow-blank`. The classic mail-merge failure is two hundred letters reading
+*"your last visit was on ."* and it is entirely preventable.
+
+#### Revenue cycle
+
+```bash
+# Completed visits with no charge posted
+python3 -m officeops charge-reconcile visits.csv charges.csv --grace-days 3 --write
+
+# Denials, ranked by dollars and separately by frequency
+python3 -m officeops denial-worklist denials.csv --days 90 --top 10
+```
+
+`denial-worklist` produces two rankings on purpose. **Dollars** is the work
+queue. **Frequency** is the staff meeting: a high-count low-dollar code is
+usually one fixable habit — an eligibility check nobody runs, a modifier nobody
+appends — and it is invisible in a dollar ranking, which is why the same code
+denies every month for a year.
+
+#### Windows-native (PowerShell)
+
+These three are PowerShell because the answer lives in Windows ACLs, the event
+log and Task Scheduler rather than in a CSV.
+
+```powershell
+# Who can read the PHI share, and what should not be there
+.\officeops\powershell\Invoke-PhiShareAudit.ps1 -Path "\\NSP-FS01\Charts" -Write
+.\officeops\powershell\Invoke-PhiShareAudit.ps1 -Path "D:\Scans","D:\Faxes" -Depth 3
+
+# Did last night's backup actually happen, and is it plausibly usable
+.\officeops\powershell\Test-BackupHealth.ps1 -BackupPath "E:\Backups\EHR" -MinRestorePoints 14
+.\officeops\powershell\Test-BackupHealth.ps1 -BackupPath "\\NAS\backups" -Pattern "*.vbk" -Write
+
+# Put the daily jobs on a timer. Run with -WhatIf first, always.
+.\officeops\powershell\Register-OfficeOpsTasks.ps1 -RepoRoot C:\nsp -ExportDir D:\Exports -WhatIf
+```
+
+`Invoke-PhiShareAudit` looks for four things: broad identities (Everyone,
+Authenticated Users, Domain Users) on a folder holding PHI; broken inheritance;
+unresolved SIDs left by accounts that were deleted rather than disabled; and
+Full Control held by a non-administrative principal. **It changes nothing and
+has no `-Fix` parameter.** An ACL script that "corrects" permissions on a share
+it does not fully understand is how a practice loses access to its own chart
+archive on a Monday morning. It produces the artifact that 45 CFR 164.308(a)(4)'s
+periodic access review needs; a person still performs the review.
+
+`Test-BackupHealth` checks four things a backup product's green tick does not
+always check: a file *newer* than the last run should have produced; a size that
+has not silently collapsed (the job ran, the source path was wrong, and it
+dutifully backed up an empty folder every night for four months); the retention
+count; and the event log. **It does not test a restore, and no script can claim
+a backup is good without one.** Restore testing is a calendar item with a human
+on it.
+
+---
+
+### 11.5 Adapting to Your EHR's Export
+
+1. Run the task. If it refuses, read the message — it prints the aliases it
+   looked for and the headers your file actually has.
+2. Copy the relevant file from `officeops/mappings/`, add your header to the
+   right list, and pass `--mapping path/to/yours.yaml`.
+3. If `make officeops-selftest` still passes while your export fails, the
+   difference is column names, not the tool.
+
+```yaml
+# my-practice-schedule.yaml — only the columns that differ.
+columns:
+  patient_name: [Patient, PT_NAME, "Patient (Last, First)"]
+  appointment_datetime: ["Appt Date/Time", SCHED_DTTM]
+  confirmed: [Confirmation Status, CONF_FLAG]
+  provider: [Rendering Provider, PROV_NAME]
+```
+
+```bash
+python3 -m officeops confirm-list schedule.csv --mapping my-practice-schedule.yaml
+```
+
+**`--mapping` merges over the bundled defaults rather than replacing them**, so
+a four-key file like the one above only has to name the four columns that
+differ. `officeops/mappings/_common.yaml` holds the aliases every task shares —
+patient identifier, name, date of birth, phone, provider — and is loaded first
+for every task, so an alias added there applies everywhere.
+
+Exports can be CSV or a single-sheet XLSX. The loader handles the byte-order
+mark Excel writes, which otherwise turns `Patient ID` into a header that matches
+nothing — a failure that reads as "no column for patient_id" on a file that
+plainly has one.
+
+---
+
+### 11.6 Scheduling, Exit Codes and Alerting
+
+Every task returns an exit code a scheduler can act on:
+
+| Code | Meaning | What to do with it |
+| --- | --- | --- |
+| `0` | Ran clean — nothing to report | Stay silent |
+| `1` | Findings — somebody needs to act | Mail the report |
+| `2` | Refused — the input could not be read, **or any row in it could not be** | Mail somebody technical |
+
+That three-way split is what stops these becoming another daily email nobody
+opens. Attach a mail action to non-zero only, and the practice hears from the
+fridge log on the days the fridge had a problem.
+
+Note what `2` covers. It is not only "the file is missing". It is also *the file
+is there and twenty of its rows did not parse* — which used to exit `0` while
+printing twenty problem lines nobody read, so twenty families were not called
+and nothing said so.
+
+**On Windows, the alerting is a wrapper, not a Task Scheduler feature.** Task
+Scheduler cannot branch on an exit code, and its "Send an e-mail" action was
+removed after Windows 7. `Register-OfficeOpsTasks.ps1` takes `-WrapperPath`
+pointing at a two-line `.cmd` that runs the job and calls your mailer when
+`%ERRORLEVEL%` is non-zero:
+
+```bat
+@echo off
+%*
+if errorlevel 1 powershell -NoProfile -File C:\OfficeOps\Send-Report.ps1 -Code %ERRORLEVEL%
+```
+
+```bash
+# Linux / macOS
+0 15 * * 1-5  cd /opt/nsp && python3 -m officeops confirm-list /exports/schedule.csv --write --out /var/officeops
+30 7 * * *    cd /opt/nsp && python3 -m officeops fridge-log /exports/fridge_log.csv --write --out /var/officeops
+0 17 * * *    cd /opt/nsp && python3 -m officeops fridge-log /exports/fridge_log.csv --write --out /var/officeops
+0 8 * * 1     cd /opt/nsp && python3 -m officeops credential-tracker /exports/credentials.csv --write --out /var/officeops
+30 8 * * *    cd /opt/nsp && python3 -m officeops lab-followup /exports/orders.csv --write --out /var/officeops
+```
+
+```powershell
+# Windows — registers the same set, -WhatIf first
+.\officeops\powershell\Register-OfficeOpsTasks.ps1 -RepoRoot C:\nsp -ExportDir D:\Exports -WhatIf
+.\officeops\powershell\Register-OfficeOpsTasks.ps1 -RepoRoot C:\nsp -ExportDir D:\Exports
+```
+
+The fridge log runs twice daily at the two times CDC asks for a reading, so a
+missed reading surfaces the same day rather than at month end when nothing can
+be done about it.
+
+---
+
+### 11.7 Phasing — Four Weeks, Then a Month, Then a Quarter
+
+This mirrors the staging in Section 7 and slots in **ahead of Phase 0**, because
+none of it depends on anything in Phase 0 and some of Phase 0's discovery work
+is easier once these are running.
+
+#### Week 1 — the five with the shortest path to a visible win
+
+| Task | Why first |
+| --- | --- |
+| `fridge-log` | Highest consequence, lowest effort, and the compliance artifact already exists in a binder |
+| `vaccine-inventory` | Finds expired doses on the shelf on day one, reliably |
+| `confirm-list` | Immediately useful to the front desk, and gives you a measured baseline confirmation rate for I-07 |
+| `lab-followup` | Every practice has more of these open than it expects |
+| `credential-tracker` | Usually surfaces at least one expired card, which is the moment the room takes this seriously |
+
+Deliverable: five scheduled jobs and one weekly email. Cost: nothing.
+
+#### Weeks 2–4 — the rest of the shipped sixteen
+
+Add `referral-followup`, `expiry-sweep`, `qc-log`, `standing-orders`,
+`recall-list`, `interpreter-list`, `day-sheets`, `mail-merge`,
+`charge-reconcile`, `denial-worklist`, `retention-sweep`, and the two PowerShell
+audits. Each is a mapping file and a scheduled job.
+
+Deliverable: a weekly operations rollup. **Measured baselines** for confirmation
+rate, outstanding labs and referrals, denial mix, and screening capture — which
+are exactly the Section 10 metrics that would otherwise stay modeled.
+
+#### Month 2 — build the next tier
+
+Pick from the catalog by what hurts: duplicate patient detection, eligibility
+batch prep, growth-entry plausibility, registry file validation, records-request
+turnaround. Each follows the same pattern and the same three rules.
+
+#### Quarter 2 onward — run alongside the AI initiatives
+
+By this point Section 7's Phase 1 is under way. These keep running. They are
+also the thing that keeps the AI initiatives honest: `charge-reconcile` and
+`denial-worklist` measure whether I-09 actually reduced denials, and
+`confirm-list` measures whether I-07 actually moved the confirmation rate.
+
+---
+
+### 11.8 Quantified Benefit
+
+Modeled on the same basis as Section 2, and every input below is either taken
+from Section 2 verbatim or marked **[EST]** where it is new. Two things this
+model deliberately does *not* do: it does not price front-desk work at the MA
+rate, and it does not claim any benefit that Section 5 already claims.
+
+```
+LABOR RECAPTURED  (§2.2 rates: MA $33/hr, Front Desk/admin $28/hr)
+                                                  minutes  ×days   = hrs   rate
+  Confirmation list assembly        [EST]  15/day    305     76.3  $28  = $2,136
+  Recall list assembly              [EST]  60/week    52     52.0  $28  = $1,456
+  Denial worklist assembly          [EST]  90/week    52     78.0  $28  = $2,184
+                                              front desk / billing subtotal   $5,776
+
+  Fridge log review and write-up    [EST]  10/day     365    60.8  $33  = $2,006
+  Vaccine expiry / inventory review [EST]  30/week    52     26.0  $33  =   $858
+  Chasing labs and referrals        [EST]  45/week    52     39.0  $33  = $1,287
+  QC log assembly and audit prep    [EST]  20/week    52     17.3  $33  =   $571
+  Credential / training tracking    [EST]  60/month   12     12.0  $33  =   $396
+                                              medical assistant subtotal      $5,118
+                                                            TOTAL 361 hrs   $10,895
+
+  Note on days: 305 for anything tied to a clinic session (§2.1), 365 for the
+  fridge log, because storage is monitored on days the practice is closed.
+
+LOSS AVOIDANCE
+  Expired vaccine doses caught before administration or waste
+    12 doses/yr [EST] × $85 average [EST]                    =    $1,020
+
+  Missed charge capture recovered
+    2 visits/week [EST] × 52 × $140 (§2.3 blended allowed)   =   $14,560
+                                                 SUBTOTAL    =   $15,580
+
+─────────────────────────────────────────────────────────────────
+  TOTAL MODELED ANNUAL BENEFIT                              =  $26,475
+  Annual runtime cost                                       =       $0
+  One-time build (already done for the nineteen)            =       $0
+  Ongoing maintenance (mapping updates after an EHR change) =   ~4 hrs
+─────────────────────────────────────────────────────────────────
+```
+
+**What is deliberately NOT counted here, and why.**
+
+*Cold-chain loss avoidance* belongs to I-08, not here. I-08 models it correctly
+as Δprobability × value: 25% with manual twice-daily monitoring, 3% with
+continuous telemetry, so 22% × $20,000. `fridge-log` **reviews the manual log**
+— it is the 25% baseline state, not an improvement on it — so claiming avoided
+loss for it would both double-count I-08's benefit and misstate the arithmetic
+as *baseline* probability × value. What `fridge-log` genuinely adds inside that
+baseline is faster detection of an excursion that is already recorded, and days
+with no reading at all, which manual review reliably misses. That is worth
+something and it is not separable, so it is worth zero here.
+
+*Denial reduction* belongs to I-09. `denial-worklist` re-orders a queue; it does
+not prevent a denial. Section 6 already counts I-09's $22,000, and adding a
+percentage improvement on top would be the same dollars twice.
+
+**Which numbers to trust.** The labor lines are the softest figures in this
+document — recaptured minutes distributed across a day are real and hard to
+observe, and §2.4's discount logic applies. The **charge-capture line is the
+defensible one**, because it is countable: run `charge-reconcile` for a month,
+count what it finds, multiply by $140. Do exactly that in the first thirty days
+and replace the estimate; §10.1 asks the same of every other modeled input.
+
+**The number that matters is not in the table.** It is that this costs nothing
+and carries no vendor risk, so the comparison is not against an alternative
+product — it is against continuing to do the work by hand.
+
+### 11.9 Risks & Controls
+
+| Risk | Severity | Control |
+| --- | --- | --- |
+| A script produces a wrong list and somebody acts on it | Medium | Every task reports the rows it could not read, with row numbers, and any unreadable row exits 2. Every written CSV carries three provenance columns — task, as-of date, and the parameters — on every row, so a list reopened in three months can be dated and reproduced. |
+| The EHR changes its export and a job starts failing | Medium | The failure is loud (exit code 2) and the message names the missing column and the headers present. Mappings are data, so the fix needs no code change. |
+| A job stops running and nobody notices | Medium | Exit codes distinguish clean from failed. A job that has stopped mailing entirely is the signal — pair it with a weekly rollup that names every job that ran. `fridge-log` has the same failure inside it: a logger that stopped reporting now produces a "no readings at all" finding for every silent day rather than a clean run. |
+| Someone adds a `--fix` mode to the ACL audit or the retention sweep | **High** | Both are documented as read-only by design and tested for it: a test fails if the ACL script references `Set-Acl`, `icacls` or any deletion cmdlet, or writes anywhere but its own output directory. Retention deletion belongs to a human against a written policy, and the retention horizon is the **later** of the minor and adult rules so a teenager's chart is never listed before an adult's. |
+| PHI leaves the practice | **High** | It cannot. A test walks the AST of every module and fails if one imports `socket`, `urllib`, `requests`, or any network library. No BAA is required because there is no third party. |
+| Output files accumulate PHI on a workstation | Medium | Output is a dated CSV in a directory the practice chooses — put it on the same encrypted, backed-up, access-controlled share as everything else, and include it in the retention policy. Rendered letters go to their own file and are kept out of the report body and the JSON, so the same names and addresses are not duplicated into a second artifact nobody is tracking. |
+| Scripts become one person's private tooling | Medium | One entry point (`python3 -m officeops list`), one test suite, one self-test, and mappings in version control. The inventory is a command, not a folder somebody has to remember. |
 
 ---
 
@@ -3638,19 +4365,25 @@ Complete for every vendor before any PHI flows. Retain the completed checklist.
 ## Closing Note
 
 The most important thing in this document is not any single initiative. It is
-the discipline that runs through all ten:
+the discipline that runs through all of them:
 
 **The machine drafts. The licensed human decides. The audit log proves it.**
 
-That is not a hedge against regulatory risk, though it is that. It is the correct
-architecture for a domain where the cost of a confident wrong answer is measured
-in children rather than dollars. Six of these ten initiatives use no language
-model at all, or use one only to write down what a human already decided. The
-value is in the plumbing — connecting systems that do not talk, and replacing
-paper with structured data that can be queried, audited, and improved.
+That is not a hedge against regulatory risk, though it is that. It is the
+correct architecture for a domain where the cost of a confident wrong answer is
+measured in children rather than dollars. Six of the ten initiatives in
+Section 5 use no language model at all, or use one only to write down what a
+human already decided — and every one of the fifty tasks in Section 11 uses
+none. The value is in the plumbing: connecting systems that do not talk, and
+replacing paper with structured data that can be queried, audited and improved.
+
+**If you take one thing from this document, take Section 11.** It costs nothing,
+it carries no vendor risk, it starts this week, and the practice is better off
+even if nothing else in here is ever funded. Everything above it is worth doing;
+none of it is worth waiting for.
 
 ---
 
-*Prepared by Carly Altman · August 2026*
+*Prepared by Carly Altman · August 2026 · v2.0*
 *Pricing verified August 2026 from public vendor materials; confirm directly before contracting.*
 *This document contains no protected health information.*
